@@ -7,12 +7,12 @@ namespace sqlite.movies.Models
     {
         public long MovieId { get; set; }
         public long PersonId { get; set; }
-        public string? CharacterName { get; set; }
+        public string CharacterName { get; set; } = null!;
         public long GenderId { get; set; }
-        public long? CastOrder { get; set; }
+        public long CastOrder { get; set; }
 
-        public virtual Gender Gender { get; set; }
-        public virtual Movie Movie { get; set; }
-        public virtual Person Person { get; set; }
+        public virtual Gender Gender { get; set; } = null!;
+        public virtual Movie Movie { get; set; } = null!;
+        public virtual Person Person { get; set; } = null!;
     }
 }

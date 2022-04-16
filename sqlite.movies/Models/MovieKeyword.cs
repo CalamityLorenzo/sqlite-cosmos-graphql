@@ -8,7 +8,7 @@ namespace sqlite.movies.Models
         public long MovieId { get; set; }
         public long KeywordId { get; set; }
 
-        //public virtual Keyword Keyword { get; set; } = null;
+        public virtual Keyword Keyword { get; set; } = null;
         //public virtual Movie Movie { get; set; } = null;
     }
 }

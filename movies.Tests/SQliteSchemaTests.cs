@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using sqlite.movies.Context;
+using sqlite.movies.MovieCtx;
 using System.Diagnostics;
 using System.Linq;
 
@@ -12,7 +12,7 @@ namespace movies.Tests
         [TestMethod]
         public void MoviesAvailable()
         {
-            MoviesDbCtx ctx = new();
+            MovieDbCtx ctx = new();
             var cnt = ctx.Movies.Count();
             Debug.WriteLine(cnt);
             Assert.IsTrue(cnt > 1);
@@ -21,7 +21,7 @@ namespace movies.Tests
         [TestMethod]
         public void MoviesGenres()
         {
-            MoviesDbCtx ctx = new();
+            MovieDbCtx ctx = new();
             var allGenres = ctx.Movies
                                 .Include(a => a.Genres).Select(a => a.Genres).ToList();
 
@@ -35,7 +35,7 @@ namespace movies.Tests
         [TestMethod]
         public void MovieKeywords()
         {
-            MoviesDbCtx ctx = new();
+            MovieDbCtx ctx = new();
             var allKeywords = ctx.Movies
                                 .Include(a => a.Keywords).Select(a => a.Keywords).ToList();
 
@@ -49,9 +49,9 @@ namespace movies.Tests
         [TestMethod]
         public void MovieCast()
         {
-            MoviesDbCtx ctx = new();
+            MovieDbCtx ctx = new();
             var alLCast = ctx.Movies
-                                .Include(a => a.Cast).Select(a => a.Cast).ToList();
+                                .Include(a => a.MovieCasts).Select(a => a.MovieCasts).ToList();
 
             //var things = ctx.MovieGenres.Include(a => a.Movie).ToList();
 

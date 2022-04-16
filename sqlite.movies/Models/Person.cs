@@ -5,9 +5,14 @@ namespace sqlite.movies.Models
 {
     public partial class Person
     {
-        public long PersonId { get; set; }
-        public string PersonName { get; set; }
+        public Person()
+        {
+            MovieCasts = new HashSet<MovieCast>();
+        }
 
-        public virtual List<Movie> Movies { get; set; } = new List<Movie>();
+        public long PersonId { get; set; }
+        public string? PersonName { get; set; }
+
+        public virtual ICollection<MovieCast> MovieCasts { get; set; }
     }
 }
