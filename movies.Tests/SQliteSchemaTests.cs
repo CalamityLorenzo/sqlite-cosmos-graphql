@@ -24,9 +24,6 @@ namespace movies.Tests
             MovieDbCtx ctx = new();
             var allGenres = ctx.Movies
                                 .Include(a => a.Genres).Select(a => a.Genres).ToList();
-
-            //var things = ctx.MovieGenres.Include(a => a.Movie).ToList();
-
             var cnt = allGenres.Count();
             Debug.WriteLine(cnt);
             Assert.IsTrue(cnt > 1);

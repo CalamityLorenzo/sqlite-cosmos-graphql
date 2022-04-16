@@ -5,6 +5,7 @@ using sqlite.movies.Models;
 using sqlite.movies.MovieCtx;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -16,19 +17,29 @@ namespace movies.Tests
     public class AddMovieData
     {
         [TestMethod]
+
+        public async Task ResetMovies()
+        {
+            AddToDb addTodb = new();
+            await addTodb.MoviesReset();
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod]
         public async Task CreateMovies()
         {
             try
             {
-                MovieDbCtx ctx = new();
+                DbContextOptionsBuilder<MovieDbCtx> opts = new DbContextOptionsBuilder<MovieDbCtx>();
+                opts.UseSqlite("Data Source=../../../../movies.db");
+                opts.LogTo((str) => Debug.WriteLine(str));
+
+                MovieDbCtx ctx = new(opts.Options);
                 var allMovies = ctx.Movies
                                     .ToList();
 
                 List<MovieDb> nodes = new();
-                var opts = new JsonSerializerOptions
-                {
-                    MaxDepth = 2
-                };
+
                 foreach (var item in allMovies)
                 {
                     var str = Encoding.UTF8.GetString(item.ReleaseDate, 0, item.ReleaseDate.Length);
@@ -61,30 +72,30 @@ namespace movies.Tests
                 }
                 AddToDb addTodb = new();
                 await addTodb.AddMovies(nodes.ToArray());
+                Assert.IsTrue(true);
             }
             catch (Exception ex)
             {
                 ;
+                Assert.IsTrue(false);
             }
         }
-
         [TestMethod]
         public async Task CreateKeywords()
         {
-
             try
             {
-                MovieDbCtx ctx = new();
 
+                MovieDbCtx ctx = new();
                 var movies = ctx.Movies.
                                         Include(a => a.Keywords).ToList();
                 AddToDb addTodb = new();
-                movies.ForEach(async m =>
+                foreach (var movie in movies)
                 {
-                    var keywords = m.Keywords.Select(a => a.KeywordName).ToList();
-                    await addTodb.UpdateKeywords(m.MovieId, keywords );
+                    var keywords = movie.Keywords.Select(a => a.KeywordName).ToList();
+                    await addTodb.UpdateKeywords(movie.MovieId, keywords);
 
-                });
+                };
                 List<MovieDb> nodes = new();
             }
             catch (Exception ex)
@@ -92,5 +103,29 @@ namespace movies.Tests
                 throw;
             }
         }
+        [TestMethod]
+        public async Task CreateGenres()
+        {
+            try
+            {
+
+                MovieDbCtx ctx = new();
+                var movies = ctx.Movies.
+                                        Include(a => a.Genres).ToList();
+
+                AddToDb addToDb = new();
+                foreach (var movie in movies)
+                {
+                    var genres = movie.Genres.Select(a => a.GenreName).ToList();
+                    await addToDb.UpdateGenres(movie.MovieId, genres);
+                }
+                Assert.IsTrue(true);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
     }
 }
