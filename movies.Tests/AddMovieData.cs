@@ -1,4 +1,5 @@
 ﻿using cosmosDb.movies;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using sqlite.movies.Models;
@@ -8,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace movies.Tests
@@ -30,15 +30,11 @@ namespace movies.Tests
         {
             try
             {
-                DbContextOptionsBuilder<MovieDbCtx> opts = new DbContextOptionsBuilder<MovieDbCtx>();
-                opts.UseSqlite("Data Source=../../../../movies.db");
-                opts.LogTo((str) => Debug.WriteLine(str));
-
-                MovieDbCtx ctx = new(opts.Options);
+                MovieDbCtx ctx = new();
                 var allMovies = ctx.Movies
                                     .ToList();
 
-                List<MovieDb> nodes = new();
+                List<MovieDb> movies = new();
 
                 foreach (var item in allMovies)
                 {
@@ -65,13 +61,16 @@ namespace movies.Tests
                             Keywords = new List<string>(),
                             MovieStatus = item.MovieStatus
                         };
-                        nodes.Add(funkyChicken);
+                        movies.Add(funkyChicken);
                     }
 
 
                 }
-                AddToDb addTodb = new();
-                await addTodb.AddMovies(nodes.ToArray());
+                MoviesRepository moviesRepo = new();
+                foreach (var item in movies)
+                {
+                    await moviesRepo.AddNewMovie(item);
+                }
                 Assert.IsTrue(true);
             }
             catch (Exception ex)
@@ -87,14 +86,49 @@ namespace movies.Tests
             {
 
                 MovieDbCtx ctx = new();
-                var movies = ctx.Movies.
-                                        Include(a => a.Keywords).ToList();
-                AddToDb addTodb = new();
-                foreach (var movie in movies)
-                {
-                    var keywords = movie.Keywords.Select(a => a.KeywordName).ToList();
-                    await addTodb.UpdateKeywords(movie.MovieId, keywords);
+                //var movies = ctx.Movies.ToList();
+                MoviesRepository movieRepo = new();
 
+                SqliteConnection sql = new SqliteConnection("Data Source=../../../../movies.db");
+
+                using SqliteCommand cmd = sql.CreateCommand();
+                sql.Open();
+                cmd.CommandText = @"Select mk.movie_id as movieid, k.keyword_name  as keyword
+                                    from keyword k inner join movie_keywords mk on mk.keyword_id = k.keyword_id";
+                var data = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.CloseConnection);
+
+                int currentMovieId = 0;
+                Dictionary<int, List<string>> movieDict = new();
+                while (data.Read())
+                {
+                    // add new entry 
+                    if (currentMovieId != data.GetInt32(0))
+                    {
+                        currentMovieId = data.GetInt32(0);
+                        var keywords = new List<string>() { data.GetString(1) };
+                        movieDict.Add(currentMovieId, keywords);
+                    }
+                    else
+                    {
+                        var entry = movieDict[currentMovieId];
+                        entry.Add(data.GetString(1));
+                    }
+
+                }
+
+
+
+                foreach (var movie in movieDict)
+                {
+                    MovieDb movieDb = await movieRepo.GetMovieByOldId(movie.Key);
+                    var keywords = new MovieKeywordDb
+                    {
+                        id = Guid.NewGuid(),
+                        //keywordType = "Keywords",
+                        Keywords = movie.Value.ToArray()
+                    };
+                    Debug.WriteLine(movie);
+                    await movieRepo.AddMovieKeywords(movieDb.id, keywords);
                 };
                 List<MovieDb> nodes = new();
             }
@@ -108,16 +142,44 @@ namespace movies.Tests
         {
             try
             {
+                SqliteConnection sql = new SqliteConnection("Data Source=../../../../movies.db");
 
-                MovieDbCtx ctx = new();
-                var movies = ctx.Movies.
-                                        Include(a => a.Genres).ToList();
+                using SqliteCommand cmd = sql.CreateCommand();
+                sql.Open();
+                cmd.CommandText = @"Select mk.movie_id as movieid, k.genre_name  as keyword
+                                    from genre k inner join movie_genres mk on mk.genre_id = k.genre_id";
+                var data = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.CloseConnection);
 
-                AddToDb addToDb = new();
-                foreach (var movie in movies)
+                int currentMovieId = 0;
+                Dictionary<int, List<string>> movieDict = new();
+                while (data.Read())
                 {
-                    var genres = movie.Genres.Select(a => a.GenreName).ToList();
-                    await addToDb.UpdateGenres(movie.MovieId, genres);
+                    // add new entry 
+                    if (currentMovieId != data.GetInt32(0))
+                    {
+                        currentMovieId = data.GetInt32(0);
+                        var keywords = new List<string>() { data.GetString(1) };
+                        movieDict.Add(currentMovieId, keywords);
+                    }
+                    else
+                    {
+                        var entry = movieDict[currentMovieId];
+                        entry.Add(data.GetString(1));
+                    }
+
+                }
+                AddToDb addToDb = new();
+                MoviesRepository movieRepo = new();
+                foreach (var movie in movieDict)
+                {
+                    MovieDb movieDb = await movieRepo.GetMovieByOldId(movie.Key);
+                    var keywords = new MovieGenreKeywordDb
+                    {
+                        id = Guid.NewGuid(),
+                        Keywords = movie.Value.ToArray()
+                    };
+                    Debug.WriteLine(movie);
+                    await movieRepo.AddMovieGenres(movieDb.id, keywords);
                 }
                 Assert.IsTrue(true);
             }

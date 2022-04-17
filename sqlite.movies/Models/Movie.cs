@@ -33,5 +33,6 @@ namespace sqlite.movies.Models
         public virtual ICollection<Genre> Genres { get; set; }
         public virtual ICollection<Keyword> Keywords { get; set; }
         public virtual ICollection<Language> Languages { get; set; }
+
     }
 }

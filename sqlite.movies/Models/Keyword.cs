@@ -12,7 +12,6 @@ namespace sqlite.movies.Models
 
         public long KeywordId { get; set; }
         public string KeywordName { get; set; } = null!;
-
         public virtual ICollection<Movie> Movies { get; set; }
     }
 }

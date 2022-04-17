@@ -80,7 +80,7 @@ namespace cosmosDb.movies
                     foreach (var item in await feedIteraor.ReadNextAsync())
                     {
                         updateMovieAction(item);
-                        container.UpsertItemAsync(item);
+                        await container.UpsertItemAsync(item);
                     }
                 }
             }

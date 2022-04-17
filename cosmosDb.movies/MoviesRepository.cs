@@ -1,14 +1,9 @@
 ﻿using Microsoft.Azure.Cosmos;
 using sqlite.movies.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace cosmosDb.movies
 {
-    internal class MoviesRepository
+    public class MoviesRepository
     {
         private CosmosClient cm;
         private Database db;
@@ -19,18 +14,74 @@ namespace cosmosDb.movies
             //this.cm = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
             this.db = cm.GetDatabase("movies");
         }
+        private async Task<Container> ConfigureMovieContainer()
+        {
+            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/yearReleased" });
+            return containerResponse.Container;
+        }
+
+        private async Task<Container> ConfigureKeywordsContainer()
+        {
+            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "keywords", PartitionKeyPath = "/keywordType" });
+            return containerResponse.Container;
+        }
 
         public async Task<MovieDb> AddNewMovie(MovieDb movie)
         {
-            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/yearReleased" });
-            var container = containerResponse.Container;
-            var counter = 0;
-            var repsonse = await container.CreateItemAsync(movie, new PartitionKey(movie.yearReleased));
-            if (repsonse.StatusCode == System.Net.HttpStatusCode.OK)
+            var repsonse = await (await ConfigureMovieContainer()).CreateItemAsync(movie, new PartitionKey(movie.yearReleased));
+            if (repsonse.StatusCode == System.Net.HttpStatusCode.Created)
 
                 return movie;
-            else throw new Exception("error", repsonse.Diagnostics);
+            else throw new Exception("error");
 
+        }
+
+        public async Task<MovieGenreKeywordDb> AddMovieGenres(Guid id, MovieGenreKeywordDb genre)
+        {
+            var response = await (await ConfigureKeywordsContainer())
+                .UpsertItemAsync(genre, new PartitionKey("Genre"));
+            return genre;
+
+        }
+
+        public async Task<MovieKeywordDb> AddMovieKeywords(Guid id, MovieKeywordDb keywords)
+        {
+
+            var response = await (await ConfigureKeywordsContainer())
+                .UpsertItemAsync(keywords, new PartitionKey("Keyword"));
+            return keywords;
+        }
+
+
+
+        public async Task<MovieDb> GetMovieByOldId(long movieId)
+        {
+            QueryDefinition qd = new QueryDefinition("Select * from movies m where m.MovieId = @movieId").WithParameter("@movieId", movieId);
+            var container = await ConfigureMovieContainer();
+
+            return await GetMovie(qd, container);
+        }
+
+        private async Task<MovieDb> GetMovie(QueryDefinition qd, Container container)
+        {
+            IReadOnlyList<FeedRange> feedRanges = await container.GetFeedRangesAsync();
+            using (FeedIterator<MovieDb> feedIteraor = container.GetItemQueryIterator<MovieDb>(feedRanges[0], qd,
+                null,
+                new QueryRequestOptions
+                {
+                }))
+            {
+                while (feedIteraor.HasMoreResults)
+                {
+                    foreach (var item in await feedIteraor.ReadNextAsync())
+                    {
+                        return item;
+                    }
+                    throw new ArgumentOutOfRangeException();
+                }
+                throw new ArgumentOutOfRangeException();
+
+            }
         }
     }
 }
