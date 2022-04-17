@@ -8,7 +8,7 @@ namespace sqlite.movies.Models
         public Guid id { get; set; }
 
         public string[] Keywords { get; set; } = new string[0];
-        public virtual string keywordType { get; set; }
+        public virtual string entityType { get; set; }
 
     }
 
@@ -16,7 +16,7 @@ namespace sqlite.movies.Models
     {
         public MovieKeywordDb() 
         {
-            this.keywordType = "Keyword";
+            this.entityType = "Keyword";
         }
         
         
@@ -26,7 +26,7 @@ namespace sqlite.movies.Models
     {
         public MovieGenreKeywordDb()
         {
-            this.keywordType = "Genre";
+            this.entityType = "Genre";
         }
 
 

@@ -33,7 +33,7 @@ namespace cosmosDb.movies
 
         public async Task AddMovies(MovieDb[] movies)
         {
-            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/yearReleased" });
+            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/entityType" });
             var container = containerResponse.Container;
             var counter = 0;
             foreach (var movie in movies)
@@ -45,26 +45,7 @@ namespace cosmosDb.movies
 
         }
 
-        public async Task UpdateKeywords(long movieId, List<string> list)
-        {
-            QueryDefinition qd = new QueryDefinition("Select * from movies m where m.MovieId = @movieId").WithParameter("@movieId", movieId);
-            Action<MovieDb> updateMovieAction = (MovieDb movie) => movie.Keywords = list;
-            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/yearReleased" });
-            var container = containerResponse.Container;
-            await updateMovieAsync(qd, updateMovieAction, container);
 
-        }
-
-        public async Task UpdateGenres(long movieId, List<string> genres)
-        {
-            QueryDefinition qd = new QueryDefinition("Select * from movies m where m.MovieId = @movieId").WithParameter("@movieId", movieId);
-
-            Action<MovieDb> updateMovieAction = (MovieDb mov) => mov.Genres = genres;
-            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/yearReleased" });
-            var container = containerResponse.Container;
-            await updateMovieAsync(qd, updateMovieAction, container);
-
-        }
 
         private async Task updateMovieAsync(QueryDefinition qd, Action<MovieDb> updateMovieAction, Container container)
         {

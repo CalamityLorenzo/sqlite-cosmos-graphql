@@ -57,8 +57,6 @@ namespace movies.Tests
                             Overview = item.Overview,
                             VoteAverage = item.VoteAverage,
                             VoteCount = item.VoteCount,
-                            Genres = new List<string>(),
-                            Keywords = new List<string>(),
                             MovieStatus = item.MovieStatus
                         };
                         movies.Add(funkyChicken);
@@ -75,7 +73,8 @@ namespace movies.Tests
             }
             catch (Exception ex)
             {
-                ;
+                
+                throw;
                 Assert.IsTrue(false);
             }
         }
@@ -123,7 +122,7 @@ namespace movies.Tests
                     MovieDb movieDb = await movieRepo.GetMovieByOldId(movie.Key);
                     var keywords = new MovieKeywordDb
                     {
-                        id = Guid.NewGuid(),
+                        id = movieDb.id,
                         //keywordType = "Keywords",
                         Keywords = movie.Value.ToArray()
                     };
@@ -168,14 +167,13 @@ namespace movies.Tests
                     }
 
                 }
-                AddToDb addToDb = new();
                 MoviesRepository movieRepo = new();
                 foreach (var movie in movieDict)
                 {
                     MovieDb movieDb = await movieRepo.GetMovieByOldId(movie.Key);
                     var keywords = new MovieGenreKeywordDb
                     {
-                        id = Guid.NewGuid(),
+                        id = movieDb.id,
                         Keywords = movie.Value.ToArray()
                     };
                     Debug.WriteLine(movie);

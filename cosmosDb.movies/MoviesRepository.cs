@@ -16,7 +16,7 @@ namespace cosmosDb.movies
         }
         private async Task<Container> ConfigureMovieContainer()
         {
-            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/yearReleased" });
+            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/entityType" });
             return containerResponse.Container;
         }
 
@@ -28,7 +28,7 @@ namespace cosmosDb.movies
 
         public async Task<MovieDb> AddNewMovie(MovieDb movie)
         {
-            var repsonse = await (await ConfigureMovieContainer()).CreateItemAsync(movie, new PartitionKey(movie.yearReleased));
+            var repsonse = await (await ConfigureMovieContainer()).CreateItemAsync(movie, new PartitionKey(movie.entityType));
             if (repsonse.StatusCode == System.Net.HttpStatusCode.Created)
 
                 return movie;
@@ -38,21 +38,18 @@ namespace cosmosDb.movies
 
         public async Task<MovieGenreKeywordDb> AddMovieGenres(Guid id, MovieGenreKeywordDb genre)
         {
-            var response = await (await ConfigureKeywordsContainer())
-                .UpsertItemAsync(genre, new PartitionKey("Genre"));
+            var response = await (await ConfigureMovieContainer())
+                .UpsertItemAsync(genre, new PartitionKey(genre.entityType));
             return genre;
 
         }
 
         public async Task<MovieKeywordDb> AddMovieKeywords(Guid id, MovieKeywordDb keywords)
         {
-
-            var response = await (await ConfigureKeywordsContainer())
-                .UpsertItemAsync(keywords, new PartitionKey("Keyword"));
+            var response = await (await ConfigureMovieContainer())
+                .UpsertItemAsync(keywords, new PartitionKey(keywords.entityType));
             return keywords;
         }
-
-
 
         public async Task<MovieDb> GetMovieByOldId(long movieId)
         {
@@ -60,6 +57,12 @@ namespace cosmosDb.movies
             var container = await ConfigureMovieContainer();
 
             return await GetMovie(qd, container);
+        }
+
+        public async Task<MovieDb> GetMovie(Guid Id)
+        {
+            Container container = await ConfigureMovieContainer();
+            return await container.ReadItemAsync<MovieDb>(Id.ToString(), new PartitionKey("Movie"));
         }
 
         private async Task<MovieDb> GetMovie(QueryDefinition qd, Container container)
