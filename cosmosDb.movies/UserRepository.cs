@@ -60,12 +60,6 @@ namespace cosmosDb.movies
             using FeedIterator<T> feedIterator = container.GetItemQueryIterator<T>(qd, null, new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKeyValue) });
             while (feedIterator.HasMoreResults)
             {
-                //{
-                //    foreach (var item in await feedIterator.ReadNextAsync())
-                //    {
-                //        results.Add(item);
-                //    }
-
                 results.AddRange(await feedIterator.ReadNextAsync());
             }
 
@@ -95,27 +89,46 @@ namespace cosmosDb.movies
             try
             {
                 var container = await this.ConfigureContainer();
-                return await container.ReadItemAsync<UserReviewsDb>(userID.ToString(), new PartitionKey("Reviews"));
+                try
+                {
+                    return await container.ReadItemAsync<UserReviewsDb>(userID.ToString(), new PartitionKey("Reviews"));
+                }
+                catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
             }
             catch (CosmosException)
             {
                 throw;
             }
+
+
         }
 
-        public async Task AddReview(Guid UserId, ReviewDb userReview)
+        public async Task<UserReviewsDb> AddReview(Guid UserId, ReviewDb userReview)
         {
             try
             {
                 // get reviews
                 var container = await this.ConfigureContainer();
-                var reviewBox = await this.GetReviews(UserId);
-                var allReviews = reviewBox.reviews.Append(userReview);
-                reviewBox = reviewBox with
+                var allUserReviews = await this.GetReviews(UserId);
+
+                if (allUserReviews is null)
                 {
-                    reviews = allReviews.ToArray()
-                };
-                await container.UpsertItemAsync(reviewBox, new PartitionKey(reviewBox.userEntity));
+                    allUserReviews = new UserReviewsDb(new[] { userReview }, UserId);
+                }
+                else
+                {
+                    var allReviews = allUserReviews.reviews.Append(userReview);
+                    
+                    allUserReviews = allUserReviews with
+                    {
+                        reviews = allReviews.ToArray()
+                    };
+                }
+                var itemResponse = await container.UpsertItemAsync(allUserReviews, new PartitionKey(allUserReviews.entityType));
+                return itemResponse.Resource;
             }
             catch (CosmosException)
             {

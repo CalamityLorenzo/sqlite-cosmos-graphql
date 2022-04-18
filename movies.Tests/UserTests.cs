@@ -74,9 +74,6 @@ namespace movies.Tests
             (await movieRepo.GetMovieByName("UHF")).First(),
             };
 
-
-
-
             UserReviewsDb MauriceRevews = new(new[]{ new ReviewDb (
                 Movies[0].id,
                 Movies[0].Title,
@@ -92,7 +89,7 @@ namespace movies.Tests
                 Movies[1].yearReleased.ToString(),
                 Maurice.UserId,
                 Maurice.UserName,
-                @"She didn't understand how changed worked. When she looked at today compared to yesterday, there was nothing that she could see that was different. Yet, when she looked at today compared to last year, she couldn't see how anything was ever the same."
+                @"She didn't understand how changed worked. When she looked at today compared to yesterday, there was nothing that she could see that was different. Yet, when she looked at today compared to last year, she couldn't see how anything was ever the same.",
                 3.8D
             )}, Maurice.UserId);
 
@@ -102,7 +99,7 @@ namespace movies.Tests
                 Movies[2].yearReleased.ToString(),
                 Paul.UserId,
                 Paul.UserName,
-               "It had been a rough day. Things hadn't gone as planned and that meant Hannah got yelled at by her boss. It didn't even matter that it wasn't her fault. When things went wrong at work, Hannah got the blame no matter the actual circumstances. It wasn't fair, but there was little she could do without risking her job, and she wasn't in a position to do that with the plans she had."
+               "It had been a rough day. Things hadn't gone as planned and that meant Hannah got yelled at by her boss. It didn't even matter that it wasn't her fault. When things went wrong at work, Hannah got the blame no matter the actual circumstances. It wasn't fair, but there was little she could do without risking her job, and she wasn't in a position to do that with the plans she had.",
                 5.5D
             ),
             new ReviewDb (
@@ -111,9 +108,9 @@ namespace movies.Tests
                 Movies[3].yearReleased.ToString(),
                 Paul.UserId,
                 Paul.UserName,
-               "The day had begun on a bright note. The sun finally peeked through the rain for the first time in a week, and the birds were sinf=ging in its warmth. There was no way to anticipate what was about to happen. It was a worst-case scenario and there was no way out of it"
+               "The day had begun on a bright note. The sun finally peeked through the rain for the first time in a week, and the birds were sinf=ging in its warmth. There was no way to anticipate what was about to happen. It was a worst-case scenario and there was no way out of it",
                 7.2D
-            )}, Maurice.UserId);
+            )}, Paul.UserId);
 
             UserReviewsDb NeilReviews = new(new[]{ new ReviewDb (
                 Movies[4].id,
@@ -132,12 +129,15 @@ namespace movies.Tests
                 Neil.UserName,
                 "The clowns had taken over. And yes, they were literally clowns. Over 100 had appeared out of a small VW bug that had been driven up to the bank. Now they were all inside and had taken it over.",
                 2.3D
-            )}, Maurice.UserId);
+            )}, Neil.UserId);
 
 
-            await userRepo.AddReview(Maurice.UserId, MauriceRevews);
-            await userRepo.AddReview(PaulReviews);
-            await userRepo.AddReview(NeilReviews);
+            _ = await userRepo.AddReview(Maurice.UserId, MauriceRevews.reviews[0]);
+            _ = await userRepo.AddReview(Maurice.UserId, MauriceRevews.reviews[1]);
+            _ = await userRepo.AddReview(Paul.UserId, PaulReviews.reviews[0]);
+            _ = await userRepo.AddReview(Paul.UserId, PaulReviews.reviews[1]);
+            _ = await userRepo.AddReview(Neil.UserId, NeilReviews.reviews[0]);
+            _ = await userRepo.AddReview(Neil.UserId, NeilReviews.reviews[1]);
 
         }
 

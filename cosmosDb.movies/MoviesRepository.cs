@@ -60,6 +60,15 @@ namespace cosmosDb.movies
             return await container.ReadItemAsync<MovieDb>(Id.ToString(), new PartitionKey("Movie"));
         }
 
+        public async Task<IList<MovieDb>> SearchMoviesByTitleDescription(string searchTerm)
+        {
+            Container container = await ConfigureMovieContainer();
+
+            var sql = $"Select * from c where c.Title LIKE @searchTerm or c.Overview LIKE @searchTerm";
+            QueryDefinition qd = new QueryDefinition(sql).WithParameter("@searchTerm", $"%{searchTerm}%");
+            return await GetMovie(qd, container);
+        }
+
         public async Task<IEnumerable<MovieDb>> GetMovieByName(string name)
         {
             Container container = await ConfigureMovieContainer();

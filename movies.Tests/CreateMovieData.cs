@@ -185,5 +185,14 @@ namespace movies.Tests
             }
         }
 
+        [TestMethod("4. Search by title/overview")]
+        public async Task SearchMovies()
+        {
+            MoviesRepository repo = new();
+            var results = await repo.SearchMoviesByTitleDescription("ome");
+
+            Assert.IsTrue(results.Count > 1000);
+        }
+
     }
 }
