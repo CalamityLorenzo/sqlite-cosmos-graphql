@@ -20,11 +20,6 @@ namespace cosmosDb.movies
             return containerResponse.Container;
         }
 
-        private async Task<Container> ConfigureKeywordsContainer()
-        {
-            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "keywords", PartitionKeyPath = "/keywordType" });
-            return containerResponse.Container;
-        }
 
         public async Task<MovieDb> AddNewMovie(MovieDb movie)
         {
@@ -36,7 +31,7 @@ namespace cosmosDb.movies
 
         }
 
-        public async Task<MovieGenreKeywordDb> AddMovieGenres(Guid id, MovieGenreKeywordDb genre)
+        public async Task<MovieGenreDb> AddMovieGenres(Guid id, MovieGenreDb genre)
         {
             var response = await (await ConfigureMovieContainer())
                 .UpsertItemAsync(genre, new PartitionKey(genre.entityType));
@@ -51,12 +46,12 @@ namespace cosmosDb.movies
             return keywords;
         }
 
-        public async Task<MovieDb> GetMovieByOldId(long movieId)
+        public async Task<MovieDb?> GetMovieByOldId(long movieId)
         {
             QueryDefinition qd = new QueryDefinition("Select * from movies m where m.MovieId = @movieId").WithParameter("@movieId", movieId);
             var container = await ConfigureMovieContainer();
 
-            return await GetMovie(qd, container);
+            return (await GetMovie(qd, container)).FirstOrDefault();
         }
 
         public async Task<MovieDb> GetMovie(Guid Id)
@@ -65,8 +60,18 @@ namespace cosmosDb.movies
             return await container.ReadItemAsync<MovieDb>(Id.ToString(), new PartitionKey("Movie"));
         }
 
-        private async Task<MovieDb> GetMovie(QueryDefinition qd, Container container)
+        public async Task<IEnumerable<MovieDb>> GetMovieByName(string name)
         {
+            Container container = await ConfigureMovieContainer();
+            var query = "Select * from c where c.Title = @title";
+            QueryDefinition qd = new QueryDefinition(query).WithParameter("@title", name);
+            return await GetMovie(qd, container);
+        }
+
+        private static async Task<List<MovieDb>> GetMovie(QueryDefinition qd, Container container)
+        {
+
+            List<MovieDb> result = new List<MovieDb>();
             IReadOnlyList<FeedRange> feedRanges = await container.GetFeedRangesAsync();
             using (FeedIterator<MovieDb> feedIteraor = container.GetItemQueryIterator<MovieDb>(feedRanges[0], qd,
                 null,
@@ -76,13 +81,9 @@ namespace cosmosDb.movies
             {
                 while (feedIteraor.HasMoreResults)
                 {
-                    foreach (var item in await feedIteraor.ReadNextAsync())
-                    {
-                        return item;
-                    }
-                    throw new ArgumentOutOfRangeException();
+                    result.AddRange(await feedIteraor.ReadNextAsync());
                 }
-                throw new ArgumentOutOfRangeException();
+                return result;
 
             }
         }

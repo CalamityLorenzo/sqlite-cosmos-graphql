@@ -5,12 +5,12 @@ using System.Text.Json.Nodes;
 
 namespace cosmosDb.movies
 {
-    public class AddToDb
+    public class Raw_Repo
     {
         private CosmosClient cm;
         private Database db;
 
-        public AddToDb()
+        public Raw_Repo()
         {
             this.cm = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
             //this.cm = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
@@ -31,6 +31,20 @@ namespace cosmosDb.movies
 
         }
 
+        public async Task UsersReset()
+        {
+
+            try
+            {
+                var container = db.GetContainer("users");
+                await container.DeleteContainerAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message, ex);
+            }
+        }
+
         public async Task AddMovies(MovieDb[] movies)
         {
             var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/entityType" });
@@ -44,8 +58,6 @@ namespace cosmosDb.movies
             }
 
         }
-
-
 
         private async Task updateMovieAsync(QueryDefinition qd, Action<MovieDb> updateMovieAction, Container container)
         {

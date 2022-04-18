@@ -1,4 +1,5 @@
 ﻿using cosmosDb.movies;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,17 +15,17 @@ using System.Threading.Tasks;
 namespace movies.Tests
 {
     [TestClass]
-    public class AddMovieData
+    public class CreateMovieData
     {
-        [TestMethod]
+        [TestMethod("0. Reset Movies")]
         public async Task ResetMovies()
         {
-            AddToDb addTodb = new();
+            Raw_Repo addTodb = new();
             await addTodb.MoviesReset();
             Assert.IsTrue(true);
         }
 
-        [TestMethod]
+        [TestMethod("1. Create Movies")]
         public async Task CreateMovies()
         {
             try
@@ -41,23 +42,23 @@ namespace movies.Tests
                     if (str != "0000-00-00")
                     {
                         var funkyChicken = new MovieDb
-                        {
-                            id = Guid.NewGuid(),
-                            MovieId = item.MovieId,
-                            Title = item.Title,
-                            Budget = item.Budget,
-                            Popularity = item.Popularity,
-                            Homepage = item.Homepage,
-                            ReleaseDate = DateTime.Parse(str),
-                            yearReleased = DateTime.Parse(str).Year,
-                            Revenue = item.Revenue.Value,
-                            Runtime = item.Runtime.Value,
-                            Tagline = item.Tagline,
-                            Overview = item.Overview,
-                            VoteAverage = item.VoteAverage,
-                            VoteCount = item.VoteCount,
-                            MovieStatus = item.MovieStatus
-                        };
+                        (
+                            id: Guid.NewGuid(),
+                            MovieId: item.MovieId,
+                            Title: item.Title,
+                            Budget: item.Budget,
+                            Popularity: item.Popularity,
+                            Homepage: item.Homepage,
+                            ReleaseDate: DateTime.Parse(str),
+                            yearReleased: DateTime.Parse(str).Year,
+                            Revenue: item.Revenue.Value,
+                            Runtime: item.Runtime.Value,
+                            Tagline: item.Tagline,
+                            Overview: item.Overview,
+                            VoteAverage: item.VoteAverage,
+                            VoteCount: item.VoteCount,
+                            MovieStatus: item.MovieStatus
+                        );
                         movies.Add(funkyChicken);
                     }
 
@@ -72,12 +73,12 @@ namespace movies.Tests
             }
             catch (Exception ex)
             {
-                
+
                 throw;
                 Assert.IsTrue(false);
             }
         }
-        [TestMethod]
+        [TestMethod("2. Create keywords")]
         public async Task CreateKeywords()
         {
             try
@@ -120,22 +121,20 @@ namespace movies.Tests
                 {
                     MovieDb movieDb = await movieRepo.GetMovieByOldId(movie.Key);
                     var keywords = new MovieKeywordDb
-                    {
-                        id = movieDb.id,
-                        //keywordType = "Keywords",
-                        Keywords = movie.Value.ToArray()
-                    };
-                    Debug.WriteLine(movie);
+                    (
+                        id: movieDb.id,
+                        Keywords: movie.Value.ToArray()
+                    );
                     await movieRepo.AddMovieKeywords(movieDb.id, keywords);
                 };
                 List<MovieDb> nodes = new();
             }
-            catch (Exception ex)
+            catch (CosmosException)
             {
                 throw;
             }
         }
-        [TestMethod]
+        [TestMethod("3. Create Genres")]
         public async Task CreateGenres()
         {
             try
@@ -170,11 +169,11 @@ namespace movies.Tests
                 foreach (var movie in movieDict)
                 {
                     MovieDb movieDb = await movieRepo.GetMovieByOldId(movie.Key);
-                    var keywords = new MovieGenreKeywordDb
-                    {
-                        id = movieDb.id,
-                        Keywords = movie.Value.ToArray()
-                    };
+                    var keywords = new MovieGenreDb
+                    (
+                        id: movieDb.id,
+                        Genres: movie.Value.ToArray()
+                    );
                     Debug.WriteLine(movie);
                     await movieRepo.AddMovieGenres(movieDb.id, keywords);
                 }
