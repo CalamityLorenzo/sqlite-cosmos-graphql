@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace cosmosDb.movies.Models.User
 {
-    public record UserReviews(Review[] reviews, string UserName)
+    public record UserReviewsDb(ReviewDb[] reviews, string UserName)
     {
-        internal string id => "Reviews";
+        internal string userEntity => "Reviews";
     }
 
-    public record Review(Guid movieId, string MovieName, string YearReleased, string ReviewContent, double rating);
+    public record ReviewDb(Guid movieId, string MovieName, string YearReleased, string ReviewContent, double rating);
 }

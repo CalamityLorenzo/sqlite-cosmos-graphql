@@ -8,27 +8,16 @@ namespace sqlite.movies.Models
         public Guid id { get; set; }
 
         public string[] Keywords { get; set; } = new string[0];
-        public virtual string entityType { get; set; }
-
+        internal virtual string entityType { get; }
     }
 
     public record MovieKeywordDb : BaseMovieKeywordDb
     {
-        public MovieKeywordDb() 
-        {
-            this.entityType = "Keyword";
-        }
-        
-        
+         internal override string entityType => "Keyword";
     }
 
     public record MovieGenreKeywordDb : BaseMovieKeywordDb
     {
-        public MovieGenreKeywordDb()
-        {
-            this.entityType = "Genre";
-        }
-
-
+        internal override string entityType => "Genre";
     }
 }

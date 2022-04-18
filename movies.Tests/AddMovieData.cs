@@ -17,7 +17,6 @@ namespace movies.Tests
     public class AddMovieData
     {
         [TestMethod]
-
         public async Task ResetMovies()
         {
             AddToDb addTodb = new();
