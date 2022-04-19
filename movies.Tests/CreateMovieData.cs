@@ -205,6 +205,68 @@ namespace movies.Tests
             }
         }
 
+        [TestMethod("5. Create Cast")]
+        public async Task CreateCast()
+        {
+            MovieDbCtx ctx = new();
+            var cast = ctx.MovieCasts.ToList();
+
+            SqliteConnection sql = new SqliteConnection("Data Source=../../../../movies.db");
+
+            using SqliteCommand cmd = sql.CreateCommand();
+            sql.Open();
+            cmd.CommandText = @"select mc.*, p.person_name, g.gender from movie_cast mc
+                                inner join person p on p.person_id = mc.person_id
+                                inner join gender g on g.gender_id = mc.gender_id
+                                order by mc.movie_id";
+            var data = await cmd.ExecuteReaderAsync(System.Data.CommandBehavior.CloseConnection);
+
+            if (data.HasRows)
+            {
+                var currentMovieId = 0;
+                var currentMovieCast = new MovieCastDb(Guid.Empty, new CastDb[] { });
+
+                List<CastDb> castList = new();
+                MoviesRepository repo = new();
+
+                CastDb MapCastMember(SqliteDataReader data, Guid id) => new CastDb(
+                                id.ToString(),
+                                data.GetFieldValue<string>(5),
+                                data.GetFieldValue<string>(2),
+                                data.GetFieldValue<string>(6),
+                                data.GetFieldValue<int>(4));
+
+                while (data.Read())
+                {
+                    MoviePersonDb personInfo = await repo.GetPersonByOldId(data.GetFieldValue<int>(1));
+
+                    if (currentMovieId != data.GetInt32(0))
+                    {
+                        // Dump old
+                        if (currentMovieCast.movieId != Guid.Empty)
+                        {
+                            _ = await repo.AddMovieCast(currentMovieCast with { Cast = castList.ToArray() });
+                        }
+                        // Create new
+                        currentMovieId = data.GetInt32(0);
+                        var movieDeets = await repo.GetMovieByOldId(currentMovieId);
+                        currentMovieCast = new MovieCastDb(movieDeets.id, new CastDb[] { });
+
+                        castList = new()
+                        {
+                            MapCastMember(data, personInfo.id)
+                        };
+                    }
+                    else
+                    {
+                        castList.Add(MapCastMember(data, personInfo.id));
+                    }
+                }
+            }
+            Assert.IsTrue(true);
+        }
+
+
         [TestMethod("6. Search by title/overview")]
         public async Task SearchMovies()
         {

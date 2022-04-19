@@ -52,7 +52,7 @@ namespace cosmosDb.movies
             QueryDefinition qd = new QueryDefinition("Select * from movies m where m.MovieId = @movieId").WithParameter("@movieId", movieId);
             var container = await ConfigureMovieContainer();
 
-            return (await GetMovie(qd, container)).FirstOrDefault();
+            return (await GetMovieRecords<MovieDb>(qd, container, "Movie")).FirstOrDefault();
         }
 
         public async Task<MovieDb> GetMovie(Guid Id)
@@ -67,7 +67,7 @@ namespace cosmosDb.movies
 
             var sql = $"Select * from c where c.Title LIKE @searchTerm or c.Overview LIKE @searchTerm";
             QueryDefinition qd = new QueryDefinition(sql).WithParameter("@searchTerm", $"%{searchTerm}%");
-            return await GetMovie(qd, container);
+            return await GetMovieRecords<MovieDb>(qd, container, "Movie");
         }
 
         public async Task<IEnumerable<MovieDb>> GetMovieByName(string name)
@@ -75,7 +75,7 @@ namespace cosmosDb.movies
             Container container = await ConfigureMovieContainer();
             var query = "Select * from c where c.Title = @title";
             QueryDefinition qd = new QueryDefinition(query).WithParameter("@title", name);
-            return await GetMovie(qd, container);
+            return await GetMovieRecords<MovieDb>(qd, container, "Movie");
         }
 
         public async Task<MoviePersonDb> AddPerson(MoviePersonDb person)
@@ -87,15 +87,16 @@ namespace cosmosDb.movies
 
 
 
-        private static async Task<List<MovieDb>> GetMovie(QueryDefinition qd, Container container)
+        private static async Task<List<T>> GetMovieRecords<T>(QueryDefinition qd, Container container, string partitionKey)
         {
 
-            List<MovieDb> result = new List<MovieDb>();
+            List<T> result = new List<T>();
             IReadOnlyList<FeedRange> feedRanges = await container.GetFeedRangesAsync();
-            using (FeedIterator<MovieDb> feedIteraor = container.GetItemQueryIterator<MovieDb>(feedRanges[0], qd,
+            using (FeedIterator<T> feedIteraor = container.GetItemQueryIterator<T>(feedRanges[0], qd,
                 null,
                 new QueryRequestOptions
                 {
+                    PartitionKey = new PartitionKey(partitionKey)
                 }))
             {
                 while (feedIteraor.HasMoreResults)
@@ -105,6 +106,20 @@ namespace cosmosDb.movies
                 return result;
 
             }
+        }
+        public async Task<MovieCastDb> AddMovieCast(MovieCastDb currentMovieCast)
+        {
+            var container = await ConfigureMovieContainer();
+            var itemResponse = await container.UpsertItemAsync<MovieCastDb>(currentMovieCast, new PartitionKey(currentMovieCast.entityType));
+            return itemResponse.Resource;
+        }
+
+        public async Task<MoviePersonDb> GetPersonByOldId(int personId)
+        {
+            var container = await ConfigureMovieContainer();
+            var sql = $"Select * from c where c.PersonId = @personId";
+            QueryDefinition qd = new QueryDefinition(sql).WithParameter("@personId", personId);
+            return (await GetMovieRecords<MoviePersonDb>(qd, container, "MoviePerson")).First();
         }
     }
 }
