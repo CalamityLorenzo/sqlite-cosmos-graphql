@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using cosmosDb.movies.Models.Movies;
+using Microsoft.Azure.Cosmos;
 using sqlite.movies.Models;
 
 namespace cosmosDb.movies
@@ -76,6 +77,15 @@ namespace cosmosDb.movies
             QueryDefinition qd = new QueryDefinition(query).WithParameter("@title", name);
             return await GetMovie(qd, container);
         }
+
+        public async Task<MoviePersonDb> AddPerson(MoviePersonDb person)
+        {
+            var container = await ConfigureMovieContainer();
+            var itemResponse = await container.CreateItemAsync<MoviePersonDb>(person, new PartitionKey(person.entityType));
+            return itemResponse.Resource;
+        }
+
+
 
         private static async Task<List<MovieDb>> GetMovie(QueryDefinition qd, Container container)
         {

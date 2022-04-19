@@ -1,4 +1,5 @@
 ﻿using cosmosDb.movies;
+using cosmosDb.movies.Models.Movies;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -185,7 +186,26 @@ namespace movies.Tests
             }
         }
 
-        [TestMethod("4. Search by title/overview")]
+        [TestMethod("4. Create People")]
+        public async Task CreatePeople()
+        {
+            MoviesRepository repo = new();
+
+            MovieDbCtx ctx = new MovieDbCtx();
+            var allPeople = ctx.People.ToList();
+
+            foreach (var person in allPeople)
+            {
+                MoviePersonDb moviePerson = new(
+                    Guid.NewGuid(),
+                    (int)person.PersonId,
+                    person.PersonName!
+                    );
+                await repo.AddPerson(moviePerson);
+            }
+        }
+
+        [TestMethod("6. Search by title/overview")]
         public async Task SearchMovies()
         {
             MoviesRepository repo = new();
