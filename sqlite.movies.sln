@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{762C5F20-ACD7-4F99-B83A-FA10B0468354}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQl.WebApi", "GraphQl.WebApi\GraphQl.WebApi.csproj", "{22E116CA-C7CF-48AF-8B10-A60CF756B3B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{94CDC778-81F5-4260-9939-0AB4790BA2ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94CDC778-81F5-4260-9939-0AB4790BA2ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94CDC778-81F5-4260-9939-0AB4790BA2ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22E116CA-C7CF-48AF-8B10-A60CF756B3B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22E116CA-C7CF-48AF-8B10-A60CF756B3B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22E116CA-C7CF-48AF-8B10-A60CF756B3B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22E116CA-C7CF-48AF-8B10-A60CF756B3B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
