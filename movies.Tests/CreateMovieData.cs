@@ -2,7 +2,6 @@
 using cosmosDb.movies.Models.Movies;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using sqlite.movies.Models;
 using sqlite.movies.MovieCtx;
@@ -18,6 +17,9 @@ namespace movies.Tests
     [TestClass]
     public class CreateMovieData
     {
+        private CosmosClient _client = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+        private string dbName = "movies";
+
         [TestMethod("0. Reset Movies")]
         public async Task ResetMovies()
         {
@@ -65,7 +67,7 @@ namespace movies.Tests
 
 
                 }
-                MoviesRepository moviesRepo = new();
+                MoviesRepository moviesRepo = new(_client, dbName);
                 foreach (var item in movies)
                 {
                     await moviesRepo.AddNewMovie(item);
@@ -86,8 +88,8 @@ namespace movies.Tests
             {
 
                 MovieDbCtx ctx = new();
-                //var movies = ctx.Movies.ToList();
-                MoviesRepository movieRepo = new();
+                MoviesRepository movieRepo = new(_client, dbName);
+
 
                 SqliteConnection sql = new SqliteConnection("Data Source=../../../../movies.db");
 
@@ -166,7 +168,7 @@ namespace movies.Tests
                     }
 
                 }
-                MoviesRepository movieRepo = new();
+                MoviesRepository movieRepo = new(_client, dbName);
                 foreach (var movie in movieDict)
                 {
                     MovieDb movieDb = await movieRepo.GetMovieByOldId(movie.Key);
@@ -189,7 +191,8 @@ namespace movies.Tests
         [TestMethod("4. Create People")]
         public async Task CreatePeople()
         {
-            MoviesRepository repo = new();
+            MoviesRepository repo = new(_client, dbName);
+
 
             MovieDbCtx ctx = new MovieDbCtx();
             var allPeople = ctx.People.ToList();
@@ -227,7 +230,8 @@ namespace movies.Tests
                 var currentMovieCast = new MovieCastDb(Guid.Empty, new CastDb[] { });
 
                 List<CastDb> castList = new();
-                MoviesRepository repo = new();
+                MoviesRepository repo = new(_client, dbName);
+
 
                 CastDb MapCastMember(SqliteDataReader data, Guid id) => new CastDb(
                                 id.ToString(),
@@ -270,7 +274,8 @@ namespace movies.Tests
         [TestMethod("6. Search by title/overview")]
         public async Task SearchMovies()
         {
-            MoviesRepository repo = new();
+            MoviesRepository repo = new(_client, dbName);
+
             var results = await repo.SearchMoviesByTitleDescription("ome");
 
             Assert.IsTrue(results.Count > 1000);

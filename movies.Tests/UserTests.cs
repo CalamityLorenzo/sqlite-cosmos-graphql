@@ -1,5 +1,6 @@
 ﻿using cosmosDb.movies;
 using cosmosDb.movies.Models.User;
+using Microsoft.Azure.Cosmos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using sqlite.movies.Models;
 using System;
@@ -12,6 +13,8 @@ namespace movies.Tests
     [TestClass]
     public class UserTests
     {
+        private CosmosClient _client = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+        private string dbName = "movies";
         [TestMethod("0. Reset Users")]
         public async Task ResetUserContainer()
         {
@@ -25,7 +28,7 @@ namespace movies.Tests
         public async Task CreateUsers()
         {
             // New Class
-            var userRepo = new UserRepository();
+            UserRepository userRepo = new (_client,dbName );
             await userRepo.AddUser(Maurice);
             await userRepo.AddUser(Laura);
             await userRepo.AddUser(Paul);
@@ -38,7 +41,8 @@ namespace movies.Tests
         [TestMethod("3. Get All User")]
         public async Task GetAllUsers()
         {
-            var userRepo = new UserRepository();
+            UserRepository userRepo = new(_client, dbName);
+
             var results = await userRepo.GetUsers();
 
             Assert.IsTrue(results.ToList().Count == 5);
@@ -47,7 +51,8 @@ namespace movies.Tests
         [TestMethod("4. Add Reviews (Also Get users)")]
         public async Task CreateUserReviews()
         {
-            var userRepo = new UserRepository();
+            UserRepository userRepo = new(_client, dbName);
+
             var Maurice = await userRepo.GetUserByUserName(this.Maurice.UserName);
             var Laura = await userRepo.GetUserByUserName(this.Laura.UserName);
             var Paul = await userRepo.GetUserByUserName(this.Paul.UserName);
@@ -59,7 +64,7 @@ namespace movies.Tests
             Assert.IsNotNull(Karen);
             Assert.IsNotNull(Neil);
 
-            var movieRepo = new MoviesRepository();
+            MoviesRepository movieRepo = new(_client, dbName);
             var Movies = new List<MovieDb>
             {
                 (await movieRepo.GetMovieByName("Killer Elite")).First(),

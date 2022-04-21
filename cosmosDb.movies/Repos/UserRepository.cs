@@ -8,10 +8,10 @@ namespace cosmosDb.movies
         private CosmosClient cm;
         private Database db;
 
-        public UserRepository()
+        public UserRepository(CosmosClient client, string databasename)
         {
-            this.cm = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
-            this.db = cm.GetDatabase("movies");
+            this.cm = client; // new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+            this.db = cm.GetDatabase(databasename);
 
         }
 
@@ -121,7 +121,7 @@ namespace cosmosDb.movies
                 else
                 {
                     var allReviews = allUserReviews.reviews.Append(userReview);
-                    
+
                     allUserReviews = allUserReviews with
                     {
                         reviews = allReviews.ToArray()

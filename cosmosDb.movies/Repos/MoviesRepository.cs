@@ -9,11 +9,10 @@ namespace cosmosDb.movies
         private CosmosClient cm;
         private Database db;
 
-        public MoviesRepository()
+        public MoviesRepository(CosmosClient client, string databasename)
         {
-            this.cm = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
-            //this.cm = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
-            this.db = cm.GetDatabase("movies");
+            this.cm = client; //new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+            this.db = cm.GetDatabase(databasename);
         }
         private async Task<Container> ConfigureMovieContainer()
         {

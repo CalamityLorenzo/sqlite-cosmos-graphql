@@ -7,7 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="12.7.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.26.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\cosmosDb.movies\cosmosDb.movies.csproj" />
   </ItemGroup>
 
 </Project>
