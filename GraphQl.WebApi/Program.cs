@@ -1,6 +1,4 @@
 using cosmosDb.movies.Repos;
-using CosmosDb.Movies;
-using System.Configuration;
 using static CosmosDb.Movies.AspNetDi;
 
 var builder = WebApplication.CreateBuilder(args);
