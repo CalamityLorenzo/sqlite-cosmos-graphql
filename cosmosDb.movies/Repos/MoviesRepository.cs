@@ -112,13 +112,26 @@ namespace cosmosDb.movies
             var itemResponse = await container.UpsertItemAsync<MovieCastDb>(currentMovieCast, new PartitionKey(currentMovieCast.entityType));
             return itemResponse.Resource;
         }
-
         public async Task<MoviePersonDb> GetPersonByOldId(int personId)
         {
             var container = await ConfigureMovieContainer();
             var sql = $"Select * from c where c.PersonId = @personId";
             QueryDefinition qd = new QueryDefinition(sql).WithParameter("@personId", personId);
             return (await GetMovieRecords<MoviePersonDb>(qd, container, "MoviePerson")).First();
+        }
+
+        public async Task<string[]> GetMovieKeywords(Guid id)
+        {
+            Container container = await ConfigureMovieContainer();
+
+            return (await container.ReadItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Keyword"))).Resource.Keywords;
+        }
+
+        public async Task<string[]> GetMovieGenres(Guid id)
+        {
+            Container container = await ConfigureMovieContainer();
+
+            return (await container.ReadItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Genre"))).Resource.Keywords;
         }
     }
 }

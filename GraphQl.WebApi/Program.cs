@@ -1,4 +1,5 @@
 using cosmosDb.movies.Repos;
+using GraphQl.WebApi.GraphQl.Movies;
 using static CosmosDb.Movies.AspNetDi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IMovieUserDb>(InitializeMovieUserDb(builder.Configuration.GetSection("MovieUserApp")));
-builder.Services.AddGraphQLServer();
+builder.Services.AddGraphQLServer()
+                .AddQueryFieldToMutationPayloads()
+                //.AddGlobalObjectIdentification()
+                .AddQueryType(d => d.Name("Query"))
+                .AddTypeExtension<MovieQueries>();
+                //.AddType<BasicMovieInfoType>();
 
 
 var app = builder.Build();
