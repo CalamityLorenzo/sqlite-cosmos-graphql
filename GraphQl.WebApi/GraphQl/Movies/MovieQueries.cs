@@ -23,7 +23,15 @@ namespace GraphQl.WebApi.GraphQl.Movies
                 Revenue: result.Revenue,
                 MovieStatus: result.MovieStatus,
                 Runtime: result.Runtime,
-                VoteCount: result.VoteCount);
+                VoteCount: result.VoteCount,
+                Genres: new string[0],
+                Keywords: new string[0]);
+        }
+
+        public async Task<MovieInfo> GetMovieByDataLoaderId(MoviesByIdInput input, [Service] IMovieUserDb repo, [DataLoader] MovieInfoDataLoader dl, CancellationToken ct)
+        {
+            return await dl.LoadAsync(input.MovieId.ToString());
         }
     }
+
 }
