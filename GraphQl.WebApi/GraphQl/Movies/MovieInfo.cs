@@ -10,7 +10,7 @@
         long Runtime,
         string MovieStatus,
         long VoteCount,
-        string[]Genres,
-        string[] Keywords);
+        string[]? Genres,
+        string[]? Keywords);
 
 }

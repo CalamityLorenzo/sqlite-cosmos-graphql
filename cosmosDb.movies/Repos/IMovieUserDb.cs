@@ -20,4 +20,9 @@ namespace cosmosDb.movies.Repos
 
         public UserRepository Users { get; }
     }
+
+    public static class MoviesAppFactory
+    {
+        public static IMovieUserDb GetApp(CosmosClient client, string dbName) => new MovieUserAppDb(client, dbName);
+    }
 }

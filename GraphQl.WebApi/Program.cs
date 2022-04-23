@@ -1,5 +1,6 @@
 using cosmosDb.movies.Repos;
 using GraphQl.WebApi.GraphQl.Movies;
+using GraphQl.WebApi.GraphQl.Types;
 using static CosmosDb.Movies.AspNetDi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +17,8 @@ builder.Services.AddGraphQLServer()
                 .AddQueryFieldToMutationPayloads()
                 //.AddGlobalObjectIdentification()
                 .AddQueryType(d => d.Name("Query"))
-                .AddTypeExtension<MovieQueries>();
-                //.AddType<BasicMovieInfoType>();
+                .AddTypeExtension<MovieQueries>()
+                .AddType<MovieInfoType>();
 
 
 var app = builder.Build();

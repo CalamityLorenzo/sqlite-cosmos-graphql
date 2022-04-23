@@ -28,7 +28,10 @@ namespace GraphQl.WebApi.GraphQl.Movies
                 Keywords: new string[0]);
         }
 
-        public async Task<MovieInfo> GetMovieByDataLoaderId(MoviesByIdInput input, [Service] IMovieUserDb repo, [DataLoader] MovieInfoDataLoader dl, CancellationToken ct)
+        public async Task<MovieInfo> GetMovieByDataLoaderId(MoviesByIdInput input,
+            [Service] IMovieUserDb repo,
+            [DataLoader] MovieInfoDataLoader dl,
+            CancellationToken ct)
         {
             return await dl.LoadAsync(input.MovieId.ToString());
         }

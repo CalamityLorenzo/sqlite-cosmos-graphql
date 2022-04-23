@@ -131,7 +131,7 @@ namespace cosmosDb.movies
         {
             Container container = await ConfigureMovieContainer();
 
-            return (await container.ReadItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Genre"))).Resource.Keywords;
+            return (await container.ReadItemAsync<MovieGenreDb>(id.ToString(), new PartitionKey("Genre"))).Resource.Genres;
         }
     }
 }
