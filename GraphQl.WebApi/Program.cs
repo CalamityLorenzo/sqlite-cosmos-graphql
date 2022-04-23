@@ -13,9 +13,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IMovieUserDb>(InitializeMovieUserDb(builder.Configuration.GetSection("MovieUserApp")));
+
 builder.Services.AddGraphQLServer()
                 .AddQueryFieldToMutationPayloads()
-                //.AddGlobalObjectIdentification()
+                .AddGlobalObjectIdentification()
                 .AddQueryType(d => d.Name("Query"))
                 .AddTypeExtension<MovieQueries>()
                 .AddType<MovieInfoType>();
