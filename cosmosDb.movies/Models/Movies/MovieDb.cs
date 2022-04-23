@@ -11,7 +11,7 @@ namespace sqlite.movies.Models
         string Homepage,
         string Overview,
         double Popularity,
-        DateTime ReleaseDate,
+        DateTimeOffset ReleaseDate,
         int yearReleased,
         long Revenue,
         long Runtime,

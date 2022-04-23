@@ -3,15 +3,15 @@ using GraphQl.WebApi.GraphQl.Movies;
 
 namespace GraphQl.WebApi.GraphQl.Types
 {
-    public class MovieInfoType : ObjectType<MovieInfo>
+    public class MovieInfoType : ObjectType<MovieGraphQl>
     {
 
-        protected override void Configure(IObjectTypeDescriptor<MovieInfo> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<MovieGraphQl> descriptor)
         {
             descriptor
                 .ImplementsNode()
                 .IdField(t => t.Id) // Ctx == middleware service inhector
-                .ResolveNode((ctx, id) => ctx.DataLoader<MovieInfoDataLoader>().LoadAsync(id, ctx.RequestAborted));
+                .ResolveNode((ctx, id) => ctx.DataLoader<MovieGraphQlByIdDataLoader>().LoadAsync(id, ctx.RequestAborted));
 
             descriptor
                 .Field(t => t.Genres)
@@ -30,7 +30,7 @@ namespace GraphQl.WebApi.GraphQl.Types
         {
             // This signature can be anything as longs as the descriptor can resolve it. (except the ct that's required.)
             public async Task<string[]> GetGenresAsync(
-                    [Parent] MovieInfo info,
+                    [Parent] MovieGraphQl info,
                     [Service] IMovieUserDb repos,
                     CancellationToken ct)
             {
@@ -39,7 +39,7 @@ namespace GraphQl.WebApi.GraphQl.Types
 
             // This signature can be anything as longs as the descriptor can resolve it. (except the ct that's required.)
             public async Task<string[]> GetKeywordsAsync(
-                    [Parent] MovieInfo info,
+                    [Parent] MovieGraphQl info,
                     [Service] IMovieUserDb repos,
                     CancellationToken ct)
             {

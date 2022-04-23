@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace movies.Tests
 {
     [TestClass]
-    public class CreateMovieData
+    public class _Raw_SetUpMovieData
     {
         private CosmosClient _client = new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
         private string dbName = "movies";
@@ -87,7 +87,7 @@ namespace movies.Tests
                 MoviesRepository moviesRepo = new(_client, dbName);
                 foreach (var item in movies)
                 {
-                    await moviesRepo.AddNewMovie(item);
+                    await moviesRepo.AddMovie(item);
                 }
                 Assert.IsTrue(true);
             }

@@ -1,6 +1,6 @@
 ﻿namespace GraphQl.WebApi.GraphQl.Movies
 {
-    public class MoviesByIdInput
+    public class MovieByIdInput
     {
         public Guid MovieId { get; set; }
     }

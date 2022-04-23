@@ -16,9 +16,13 @@ builder.Services.AddSingleton<IMovieUserDb>(InitializeMovieUserDb(builder.Config
 
 builder.Services.AddGraphQLServer()
                 .AddQueryFieldToMutationPayloads()
-                //.AddGlobalObjectIdentification()
+                .AddGlobalObjectIdentification()
                 .AddQueryType(d => d.Name("Query"))
                 .AddTypeExtension<MovieQueries>()
+
+                .AddMutationType(d=>d.Name("Mutation"))
+                .AddTypeExtension<MovieMutations>()
+
                 .AddType<MovieInfoType>();
 
 

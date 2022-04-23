@@ -11,7 +11,7 @@ namespace cosmosDb.movies
 
         public MoviesRepository(CosmosClient client, string databasename)
         {
-            this.cm = client; //new CosmosClient("AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==");
+            this.cm = client;
             this.db = cm.GetDatabase(databasename);
         }
         private async Task<Container> ConfigureMovieContainer()
@@ -19,7 +19,7 @@ namespace cosmosDb.movies
             var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/entityType" });
             return containerResponse.Container;
         }
-
+        /// Find a list of movies 
         public async Task<IList<MovieDb>> SearchMoviesByTitleDescription(string searchTerm)
         {
             Container container = await ConfigureMovieContainer();
@@ -29,16 +29,64 @@ namespace cosmosDb.movies
             return await GetMovieRecords<MovieDb>(qd, container, "Movie");
         }
 
-        public async Task<MovieDb> AddNewMovie(MovieDb movie)
+        /// <summary>
+        /// Create a new instance of a movie.
+        /// </summary>
+        /// <param name="movie"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<MovieDb> AddMovie(MovieDb movie)
         {
-            var repsonse = await (await ConfigureMovieContainer()).CreateItemAsync(movie, new PartitionKey(movie.entityType));
-            if (repsonse.StatusCode == System.Net.HttpStatusCode.Created)
-
-                return movie;
-            else throw new Exception("error");
+            if (movie.id != Guid.Empty)
+                throw new ArgumentException("Movie Already exists?");
+            else
+            {
+                var response = await (await ConfigureMovieContainer()).CreateItemAsync(movie with { id = Guid.NewGuid() }, new PartitionKey(movie.entityType));
+                if (response.StatusCode == System.Net.HttpStatusCode.Created)
+                    return response.Resource;
+                else throw new Exception("error movie not created");
+            }
 
         }
 
+        public async Task DeleteMovie(Guid id)
+        {
+            var container = await ConfigureMovieContainer();
+
+            async Task TryDelete<T>(Func<Task<ItemResponse<T>>> func)
+            {
+                try
+                {
+                    await func();
+                }
+                catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    ; // Frankly just carry on
+                }
+            }
+
+            await TryDelete(() => container.DeleteItemAsync<MovieDb>(id.ToString(), new PartitionKey("Movie")));
+            await TryDelete(() => container.DeleteItemAsync<MovieGenreDb>(id.ToString(), new PartitionKey("Genre")));
+            await TryDelete(() => container.DeleteItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Keyword")));
+            await TryDelete(() => container.DeleteItemAsync<MovieCastDb>(id.ToString(), new PartitionKey("Cast")));
+        }
+
+        public async Task<MovieDb> UpdateMovie(MovieDb movie)
+        {
+            var response = await (await ConfigureMovieContainer())
+                    .UpsertItemAsync(movie, new PartitionKey(movie.entityType));
+            if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                return response.Resource;
+            else throw new Exception("error movie not update");
+
+        }
+
+        /// <summary>
+        /// Adds anew list of generes to a particular movie
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="genre"></param>
+        /// <returns></returns>
         public async Task<MovieGenreDb> AddMovieGenres(Guid id, MovieGenreDb genre)
         {
             var response = await (await ConfigureMovieContainer())
@@ -46,7 +94,12 @@ namespace cosmosDb.movies
             return genre;
 
         }
-
+        /// <summary>
+        /// Add a new list of keywords to a particular movie
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="keywords"></param>
+        /// <returns></returns>
         public async Task<MovieKeywordDb> AddMovieKeywords(Guid id, MovieKeywordDb keywords)
         {
             var response = await (await ConfigureMovieContainer())

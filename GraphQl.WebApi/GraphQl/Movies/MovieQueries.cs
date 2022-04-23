@@ -1,16 +1,20 @@
 ﻿using cosmosDb.movies.Repos;
+using GraphQl.WebApi.GraphQl.Common;
+using sqlite.movies.Models;
 
 namespace GraphQl.WebApi.GraphQl.Movies
 {
     [ExtendObjectType("Query")]
     public class MovieQueries
     {
-        public async Task<IEnumerable<MovieInfo>> MoviesByTitleDescription(MoviesByTitleDescriptionInput input, [Service] IMovieUserDb repo, CancellationToken ct)
+        public async Task<IEnumerable<MovieGraphQl>> MoviesByTitleDescription(MoviesByTitleDescriptionInput input, [Service] IMovieUserDb repo, CancellationToken ct)
         {
             var result = await repo.Movies.SearchMoviesByTitleDescription(input.SearchTerms);
             return result.Select(mov =>
-            new MovieInfo(
-                Id: mov.id.ToString(), Title: mov.Title,
+            new MovieGraphQl(
+                Id: mov.id.ToString(), 
+                Title: mov.Title,
+                Homepage:mov.Homepage,
                 YearReleased: mov.yearReleased,
                 Budget: mov.Budget,
                 Tagline: mov.Tagline,
@@ -24,11 +28,12 @@ namespace GraphQl.WebApi.GraphQl.Movies
                 ));
         }
 
-        public async Task<MovieInfo> GetMovieById(MoviesByIdInput input, [Service] IMovieUserDb repo, CancellationToken ct)
+        public async Task<MovieGraphQl> GetMovieById(MovieByIdInput input, [Service] IMovieUserDb repo, CancellationToken ct)
         {
             var result = await repo.Movies.GetMovie(input.MovieId);
-            return new MovieInfo(Id: result.id.ToString(), Title: result.Title,
+            return new MovieGraphQl(Id: result.id.ToString(), Title: result.Title,
                 YearReleased: result.yearReleased,
+                Homepage: result.Homepage,
                 Budget: result.Budget,
                 Tagline: result.Tagline,
                 Overview: result.Overview,
@@ -40,13 +45,14 @@ namespace GraphQl.WebApi.GraphQl.Movies
                 Keywords: new string[0]);
         }
 
-        public async Task<MovieInfo> GetMovieByDataLoaderId(MoviesByIdInput input,
+        public async Task<MovieGraphQl> GetMovieByDataLoaderId(MovieByIdInput input,
             [Service] IMovieUserDb repo,
-            [DataLoader] MovieInfoDataLoader dl,
+            [DataLoader] MovieGraphQlByIdDataLoader dl,
             CancellationToken ct)
         {
             return await dl.LoadAsync(input.MovieId.ToString());
         }
-    }
+
+           }
 
 }

@@ -1,16 +1,18 @@
 ﻿namespace GraphQl.WebApi.GraphQl.Movies
 {
-    public record MovieInfo(string Id,
+    public record AddMovieGraphQl(
         string Title,
-        int YearReleased,
+        DateTimeOffset ReleaseDate,
         long Budget,
+        string Homepage,
         string Tagline,
         string Overview,
         long Revenue,
         long Runtime,
+        double VoteAverage,
         string MovieStatus,
-        long VoteCount,
-        string[]? Genres,
-        string[]? Keywords);
+        long VoteCount);
+
+
 
 }
