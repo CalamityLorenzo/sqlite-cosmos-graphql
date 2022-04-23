@@ -124,14 +124,32 @@ namespace cosmosDb.movies
         {
             Container container = await ConfigureMovieContainer();
 
-            return (await container.ReadItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Keyword"))).Resource.Keywords;
+            return (await container.ReadItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Keyword"))).Resource?.Keywords ?? new string[] { };
+        }
+
+        internal async Task<List<MovieKeywordDb>> GetMovieKeywords()
+        {
+            Container container = await ConfigureMovieContainer();
+
+            var sql = "Select * from c";
+            QueryDefinition qd = new QueryDefinition(sql);
+            return (await GetMovieRecords<MovieKeywordDb>(qd, container, "Keyword"));
+        }
+
+        internal async Task<List<MovieGenreDb>> GetMovieGenres()
+        {
+            Container container = await ConfigureMovieContainer();
+
+            var sql = "Select * from c";
+            QueryDefinition qd = new QueryDefinition(sql);
+            return (await GetMovieRecords<MovieGenreDb>(qd, container, "Genre"));
         }
 
         public async Task<string[]> GetMovieGenres(Guid id)
         {
             Container container = await ConfigureMovieContainer();
-
-            return (await container.ReadItemAsync<MovieGenreDb>(id.ToString(), new PartitionKey("Genre"))).Resource.Genres;
+            var items = (await container.ReadItemAsync<MovieGenreDb>(id.ToString(), new PartitionKey("Genre"))).Resource?.Genres ?? new string[] { };
+            return items;
         }
     }
 }

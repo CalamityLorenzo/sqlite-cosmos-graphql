@@ -5,11 +5,23 @@ namespace GraphQl.WebApi.GraphQl.Movies
     [ExtendObjectType("Query")]
     public class MovieQueries
     {
-        public async Task<IEnumerable<BasicMovieInfo>> MoviesByTitleDescription(MoviesByTitleDescriptionInput input, [Service] IMovieUserDb repo, CancellationToken ct)
+        public async Task<IEnumerable<MovieInfo>> MoviesByTitleDescription(MoviesByTitleDescriptionInput input, [Service] IMovieUserDb repo, CancellationToken ct)
         {
             var result = await repo.Movies.SearchMoviesByTitleDescription(input.SearchTerms);
             return result.Select(mov =>
-            new BasicMovieInfo(Id: mov.id.ToString(), Title: mov.Title, YearReleased: mov.yearReleased, Budget: mov.Budget, Tagline: mov.Tagline, Overview: mov.Overview)).ToList();
+            new MovieInfo(
+                Id: mov.id.ToString(), Title: mov.Title,
+                YearReleased: mov.yearReleased,
+                Budget: mov.Budget,
+                Tagline: mov.Tagline,
+                Overview: mov.Overview,
+                Revenue: mov.Revenue,
+                MovieStatus: mov.MovieStatus,
+                Runtime: mov.Runtime,
+                VoteCount: mov.VoteCount,
+                Genres: null,
+                Keywords: null
+                ));
         }
 
         public async Task<MovieInfo> GetMovieById(MoviesByIdInput input, [Service] IMovieUserDb repo, CancellationToken ct)

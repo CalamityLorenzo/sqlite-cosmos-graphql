@@ -24,9 +24,26 @@ namespace movies.Tests
         public async Task ResetMovies()
         {
             Raw_Repo addTodb = new();
-            await addTodb.MoviesReset();
+            await addTodb.ResetMovieContainer();
             Assert.IsTrue(true);
         }
+
+        [TestMethod("0. Reset Genres")]
+        public async Task ResetGenres()
+        {
+            Raw_Repo addTodb = new();
+            await addTodb.DeleteGenrePartition();
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod("0. Reset Keywords")]
+        public async Task ResetKeywords()
+        {
+            Raw_Repo addTodb = new();
+            await addTodb.DeleteKeywordPartition();
+            Assert.IsTrue(true);
+        }
+
 
         [TestMethod("1. Create Movies")]
         public async Task CreateMovies()

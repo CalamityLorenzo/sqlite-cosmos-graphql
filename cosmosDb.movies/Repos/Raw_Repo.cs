@@ -17,7 +17,7 @@ namespace cosmosDb.movies
             this.db = cm.GetDatabase("movies");
         }
 
-        public async Task MoviesReset()
+        public async Task ResetMovieContainer()
         {
             try
             {
@@ -45,6 +45,24 @@ namespace cosmosDb.movies
             }
         }
 
+        public async Task DeleteKeywordPartition()
+        {
+            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/entityType" });
+            var container = containerResponse.Container;
+            MoviesRepository mr = new MoviesRepository(this.cm, "movies");
+            // Get all the records
+            var allKeywords = await mr.GetMovieKeywords();
+
+            List<Task> tasks = new List<Task>();
+            var partyKey = new PartitionKey("Keyword");
+            foreach (var keyword in allKeywords)
+            {
+                tasks.Add(container.DeleteItemStreamAsync(keyword.id.ToString(), partyKey));
+            }
+
+            Task.WaitAll(tasks.ToArray());
+        }
+
         public async Task AddMovies(MovieDb[] movies)
         {
             var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/entityType" });
@@ -56,6 +74,25 @@ namespace cosmosDb.movies
                 counter += 1;
                 Debug.WriteLine(counter);
             }
+
+        }
+
+        public async Task DeleteGenrePartition()
+        {
+            var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "movies", PartitionKeyPath = "/entityType" });
+            var container = containerResponse.Container;
+            MoviesRepository mr = new MoviesRepository(this.cm, "movies");
+            // Get all the records
+            var allGenres = await mr.GetMovieGenres();
+
+            List<Task> tasks = new List<Task>();
+            var partyKey = new PartitionKey("Genre");
+            foreach (var genre in allGenres)
+            {
+                tasks.Add(container.DeleteItemStreamAsync(genre.id.ToString(), partyKey));
+            }
+
+            Task.WaitAll(tasks.ToArray());
 
         }
 

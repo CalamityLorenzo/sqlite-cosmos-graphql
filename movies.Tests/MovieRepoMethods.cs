@@ -20,7 +20,14 @@ namespace movies.Tests
         {
             IMovieUserDb app = MoviesAppFactory.GetApp(_client, dbName);
 
-            var keywords = await app.Movies.GetMovieKeywords(Guid.Parse("ad70b6ba-9024-48f5-bc13-7529057c9289"));
+            var movies = (await app.Movies.GetMovieByName("Back to the Future")).ToList();
+
+            Assert.IsNotNull(movies);
+            Assert.IsTrue(movies.Count > 0);
+
+
+
+            var keywords = await app.Movies.GetMovieKeywords(movies.First().id);
 
             Assert.IsNotNull(keywords);
             Assert.IsTrue(keywords.Length > 0);
@@ -31,7 +38,12 @@ namespace movies.Tests
         {
             IMovieUserDb app = MoviesAppFactory.GetApp(_client, dbName);
 
-            var genre = await app.Movies.GetMovieGenres(Guid.Parse("ad70b6ba-9024-48f5-bc13-7529057c9289"));
+            var movies = (await app.Movies.GetMovieByName("Back to the Future")).ToList();
+
+            Assert.IsNotNull(movies);
+            Assert.IsTrue(movies.Count > 0);
+
+            var genre = await app.Movies.GetMovieGenres(movies.First().id);
 
             Assert.IsNotNull(genre);
             Assert.IsTrue(genre.Length > 0);
