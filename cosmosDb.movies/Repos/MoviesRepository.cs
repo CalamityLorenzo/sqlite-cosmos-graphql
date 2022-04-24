@@ -94,6 +94,16 @@ namespace cosmosDb.movies
             return genre;
 
         }
+
+        public async Task<MovieGenreDb> UpdateMovieGenres(Guid id, string[] genres)
+        {
+            MovieGenreDb genre = new(id, genres);
+
+            var response = await (await ConfigureMovieContainer())
+                .ReplaceItemAsync(genre, genre.id.ToString(), new PartitionKey(genre.entityType));
+            return genre;
+        }
+
         /// <summary>
         /// Add a new list of keywords to a particular movie
         /// </summary>
@@ -105,6 +115,20 @@ namespace cosmosDb.movies
             var response = await (await ConfigureMovieContainer())
                 .CreateItemAsync(keywords, new PartitionKey(keywords.entityType));
             return keywords;
+        }
+
+        /// <summary>
+        /// Add a new list of keywords to a particular movie
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="keywords"></param>
+        /// <returns></returns>
+        public async Task<MovieKeywordDb> UpdateMovieKeywords(Guid id, string[] keywords)
+        {
+            MovieKeywordDb keyword = new(id, keywords);
+            var response = await (await ConfigureMovieContainer())
+                .ReplaceItemAsync(keyword, keyword.id.ToString(), new PartitionKey(keyword.entityType));
+            return keyword;
         }
 
         public async Task<MoviePersonDb> AddPerson(MoviePersonDb person)
@@ -153,8 +177,14 @@ namespace cosmosDb.movies
         public async Task<string[]> GetMovieKeywords(Guid id)
         {
             Container container = await ConfigureMovieContainer();
-
-            return (await container.ReadItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Keyword"))).Resource?.Keywords ?? new string[] { };
+            try
+            {
+                return (await container.ReadItemAsync<MovieKeywordDb>(id.ToString(), new PartitionKey("Keyword"))).Resource?.Keywords ?? new string[] { };
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return new string[0];
+            }
         }
 
         internal async Task<List<MovieKeywordDb>> GetMovieKeywords()
@@ -177,10 +207,17 @@ namespace cosmosDb.movies
 
         public async Task<string[]> GetMovieGenres(Guid id)
         {
-            Container container = await ConfigureMovieContainer();
-            var items = (await container.ReadItemAsync<MovieGenreDb>(id.ToString(),
-                new PartitionKey("Genre"))).Resource?.Genres ?? new string[] { };
-            return items;
+            try
+            {
+                Container container = await ConfigureMovieContainer();
+                var items = (await container.ReadItemAsync<MovieGenreDb>(id.ToString(),
+                    new PartitionKey("Genre"))).Resource?.Genres ?? new string[] { };
+                return items;
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return new string[0];
+            }
         }
 
         private static async Task<List<T>> GetMovieRecords<T>(QueryDefinition qd, Container container, string partitionKey)

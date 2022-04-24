@@ -12,9 +12,9 @@ namespace GraphQl.WebApi.GraphQl.Movies
             var result = await repo.Movies.SearchMoviesByTitleDescription(input.SearchTerms);
             return result.Select(mov =>
             new MovieGraphQl(
-                Id: mov.id.ToString(), 
+                DbId: mov.id,
                 Title: mov.Title,
-                Homepage:mov.Homepage,
+                Homepage: mov.Homepage,
                 YearReleased: mov.yearReleased,
                 Budget: mov.Budget,
                 Tagline: mov.Tagline,
@@ -28,31 +28,14 @@ namespace GraphQl.WebApi.GraphQl.Movies
                 ));
         }
 
-        public async Task<MovieGraphQl> GetMovieById(MovieByIdInput input, [Service] IMovieUserDb repo, CancellationToken ct)
-        {
-            var result = await repo.Movies.GetMovie(input.MovieId);
-            return new MovieGraphQl(Id: result.id.ToString(), Title: result.Title,
-                YearReleased: result.yearReleased,
-                Homepage: result.Homepage,
-                Budget: result.Budget,
-                Tagline: result.Tagline,
-                Overview: result.Overview,
-                Revenue: result.Revenue,
-                MovieStatus: result.MovieStatus,
-                Runtime: result.Runtime,
-                VoteCount: result.VoteCount,
-                Genres: new string[0],
-                Keywords: new string[0]);
-        }
-
-        public async Task<MovieGraphQl> GetMovieByDataLoaderId(MovieByIdInput input,
+        public async Task<MovieGraphQl> GetMovieById(MovieByIdInput input,
             [Service] IMovieUserDb repo,
             [DataLoader] MovieGraphQlByIdDataLoader dl,
             CancellationToken ct)
         {
-            return await dl.LoadAsync(input.MovieId.ToString());
+            return await dl.LoadAsync(input.MovieId);
         }
 
-           }
+    }
 
 }

@@ -4,18 +4,19 @@ using System.Collections.ObjectModel;
 
 namespace GraphQl.WebApi.GraphQl
 {
-    public class MovieGraphQlByIdDataLoader : BatchDataLoader<string, MovieGraphQl>
+    public class MovieGraphQlByIdDataLoader : BatchDataLoader<Guid, MovieGraphQl>
     {
         private IMovieUserDb dbCtx;
 
         public MovieGraphQlByIdDataLoader(IBatchScheduler batchScheduler, IMovieUserDb dbCtx) : base(batchScheduler) => this.dbCtx = dbCtx;
-        protected override async Task<IReadOnlyDictionary<string, MovieGraphQl>> LoadBatchAsync(IReadOnlyList<string> keys, CancellationToken cancellationToken)
+        protected override async Task<IReadOnlyDictionary<Guid, MovieGraphQl>> LoadBatchAsync(IReadOnlyList<Guid> keys, CancellationToken cancellationToken)
         {
-            var blah = keys.Select(k => dbCtx.Movies.GetMovie(Guid.Parse(k)));
+            var blah = keys.Select(k => dbCtx.Movies.GetMovie(k));
             var x = await Task.WhenAll(blah.ToArray());
-            return new ReadOnlyDictionary<string, MovieGraphQl>(x.ToDictionary(a => a.id.ToString(),
+            return new ReadOnlyDictionary<Guid, MovieGraphQl>(x.ToDictionary(a => a.id,
                 result => new MovieGraphQl(
-                        Id: result.id.ToString(), Title: result.Title,
+                        DbId: result.id,
+                        Title: result.Title,
                         Homepage: result.Homepage,
                         YearReleased: result.yearReleased,
                         Budget: result.Budget,

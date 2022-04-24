@@ -31,7 +31,8 @@ namespace GraphQl.WebApi.GraphQl.Movies
                       ));
 
                 return new AddMoviePayload(new MovieGraphQl(
-                        Id: result.id.ToString(), Title: result.Title,
+                        DbId: result.id,
+                        Title: result.Title,
                         Homepage: result.Homepage,
                         YearReleased: result.yearReleased,
                         Budget: result.Budget,
@@ -53,6 +54,30 @@ namespace GraphQl.WebApi.GraphQl.Movies
                     errors.Add(new UserError(ex.InnerException.Message, ex.InnerException.Source ?? ""));
                 }
                 return new AddMoviePayload(errors);
+            }
+        }
+
+        public async Task<UpdateGenrePayload> UpdateMovieGenres(UpdateGenreInput input, [Service] IMovieUserDb repo, CancellationToken ct)
+        {
+            try
+            {
+                return new UpdateGenrePayload((await repo.Movies.UpdateMovieGenres(Guid.Parse(input.MovieId), input.Genres)).Genres);
+            }
+            catch(Exception ex)
+            {
+                return new UpdateGenrePayload(new UserError[] { new UserError(ex.Message, ex.Source ?? string.Empty) });
+            }
+        }
+
+        public async Task<UpdateKeywordPayload> UpdateMovieKeywords(UpdateKeywordInput input, [Service] IMovieUserDb repo, CancellationToken ct)
+        {
+            try
+            {
+                return new UpdateKeywordPayload((await repo.Movies.UpdateMovieKeywords(Guid.Parse(input.MovieId), input.Keywords)).Keywords);
+            }
+            catch (Exception ex)
+            {
+                return new UpdateKeywordPayload(new UserError[] { new UserError(ex.Message, ex.Source ?? string.Empty) });
             }
         }
 

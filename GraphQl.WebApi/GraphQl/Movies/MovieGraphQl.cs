@@ -1,6 +1,7 @@
 ﻿namespace GraphQl.WebApi.GraphQl.Movies
 {
-    public record MovieGraphQl(string Id,
+    public record MovieGraphQl(
+        Guid DbId,
         string Title,
         int YearReleased,
         long Budget,
@@ -12,6 +13,9 @@
         string MovieStatus,
         long VoteCount,
         string[]? Genres,
-        string[]? Keywords);
+        string[]? Keywords)
+    {
+        public Guid GraphId { get; set; }
+    }
 
 }

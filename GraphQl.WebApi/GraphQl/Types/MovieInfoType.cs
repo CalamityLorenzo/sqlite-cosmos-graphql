@@ -10,13 +10,13 @@ namespace GraphQl.WebApi.GraphQl.Types
         {
             descriptor
                 .ImplementsNode()
-                .IdField(t => t.Id) // Ctx == middleware service inhector
+                .IdField(t => t.GraphId) // Ctx == middleware service inhector
                 .ResolveNode((ctx, id) => ctx.DataLoader<MovieGraphQlByIdDataLoader>().LoadAsync(id, ctx.RequestAborted));
 
             descriptor
                 .Field(t => t.Genres)
                 .ResolveWith<MovieInfoResolvers>(t => t.GetGenresAsync(default!, default!, default));
-                
+
 
             descriptor
                 .Field(t => t.Keywords)
@@ -34,7 +34,7 @@ namespace GraphQl.WebApi.GraphQl.Types
                     [Service] IMovieUserDb repos,
                     CancellationToken ct)
             {
-                return await repos.Movies.GetMovieGenres(Guid.Parse(info.Id));
+                return await repos.Movies.GetMovieGenres(info.DbId);
             }
 
             // This signature can be anything as longs as the descriptor can resolve it. (except the ct that's required.)
@@ -43,7 +43,7 @@ namespace GraphQl.WebApi.GraphQl.Types
                     [Service] IMovieUserDb repos,
                     CancellationToken ct)
             {
-                return await repos.Movies.GetMovieKeywords(Guid.Parse(info.Id));
+                return await repos.Movies.GetMovieKeywords(info.DbId);
             }
         }
     }
