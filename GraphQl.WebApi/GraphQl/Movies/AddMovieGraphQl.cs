@@ -12,7 +12,4 @@
         double VoteAverage,
         string MovieStatus,
         long VoteCount);
-
-
-
 }
