@@ -29,11 +29,11 @@ namespace movies.Tests
         {
             // New Class
             UserRepository userRepo = new (_client,dbName );
-            await userRepo.AddUser(Maurice);
-            await userRepo.AddUser(Laura);
-            await userRepo.AddUser(Paul);
-            await userRepo.AddUser(Karen);
-            await userRepo.AddUser(Neil);
+            await userRepo.Add(Maurice);
+            await userRepo.Add(Laura);
+            await userRepo.Add(Paul);
+            await userRepo.Add(Karen);
+            await userRepo.Add(Neil);
 
             Assert.IsTrue(true);
         }
@@ -43,7 +43,7 @@ namespace movies.Tests
         {
             UserRepository userRepo = new(_client, dbName);
 
-            var results = await userRepo.GetUsers();
+            var results = await userRepo.GetAll();
 
             Assert.IsTrue(results.ToList().Count == 5);
         }
@@ -53,11 +53,11 @@ namespace movies.Tests
         {
             UserRepository userRepo = new(_client, dbName);
 
-            var Maurice = await userRepo.GetUserByUserName(this.Maurice.UserName);
-            var Laura = await userRepo.GetUserByUserName(this.Laura.UserName);
-            var Paul = await userRepo.GetUserByUserName(this.Paul.UserName);
-            var Karen = await userRepo.GetUserByUserName(this.Karen.UserName);
-            var Neil = await userRepo.GetUserByUserName(this.Neil.UserName);
+            var Maurice = await userRepo.GetByUsername(this.Maurice.UserName);
+            var Laura = await userRepo.GetByUsername(this.Laura.UserName);
+            var Paul = await userRepo.GetByUsername(this.Paul.UserName);
+            var Karen = await userRepo.GetByUsername(this.Karen.UserName);
+            var Neil = await userRepo.GetByUsername(this.Neil.UserName);
             Assert.IsNotNull(Maurice);
             Assert.IsNotNull(Laura);
             Assert.IsNotNull(Paul);

@@ -17,7 +17,6 @@ namespace GraphQl.WebApi.GraphQl.Types
                 .Field(t => t.Genres)
                 .ResolveWith<MovieInfoResolvers>(t => t.GetGenresAsync(default!, default!, default));
 
-
             descriptor
                 .Field(t => t.Keywords)
                 .ResolveWith<MovieInfoResolvers>(t => t.GetKeywordsAsync(default!, default!, default));

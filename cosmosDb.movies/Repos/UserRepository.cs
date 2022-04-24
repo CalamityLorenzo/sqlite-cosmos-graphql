@@ -21,7 +21,7 @@ namespace cosmosDb.movies
             return containerResponse.Container;
         }
 
-        public async Task<UserDetailsDb> AddUser(UserDetailsDb newUser)
+        public async Task<UserDetailsDb> Add(UserDetailsDb newUser)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace cosmosDb.movies
             }
         }
 
-        public async Task<IEnumerable<UserDetailsDb>> GetUsers()
+        public async Task<IEnumerable<UserDetailsDb>> GetAll()
         {
             var container = await this.ConfigureContainer();
             var qd = new QueryDefinition("Select * from  u");
@@ -46,7 +46,7 @@ namespace cosmosDb.movies
             //throw new Exception();
         }
 
-        public async Task<UserDetailsDb> GetUserByUserName(string userName)
+        public async Task<UserDetailsDb> GetByUsername(string userName)
         {
             var container = await this.ConfigureContainer();
             var qd = new QueryDefinition("Select * from users u where u.UserName = @username").WithParameter("@username", userName);
