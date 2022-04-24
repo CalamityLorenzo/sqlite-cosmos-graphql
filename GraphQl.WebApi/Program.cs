@@ -1,6 +1,7 @@
 using cosmosDb.movies.Repos;
 using GraphQl.WebApi.GraphQl.Movies;
 using GraphQl.WebApi.GraphQl.Types;
+using GraphQl.WebApi.GraphQl.Users;
 using static CosmosDb.Movies.AspNetDi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,8 +18,10 @@ builder.Services.AddSingleton<IMovieUserDb>(InitializeMovieUserDb(builder.Config
 builder.Services.AddGraphQLServer()
                 .AddQueryFieldToMutationPayloads()
                 .AddGlobalObjectIdentification()
+
                 .AddQueryType(d => d.Name("Query"))
                 .AddTypeExtension<MovieQueries>()
+                .AddTypeExtension<UserQueries>()
 
                 .AddMutationType(d=>d.Name("Mutation"))
                 .AddTypeExtension<MovieMutations>()

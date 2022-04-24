@@ -21,6 +21,14 @@ namespace cosmosDb.movies
             return containerResponse.Container;
         }
 
+        public async Task<IList<UserDetailsDb>> GetByUsernames(IEnumerable<string> keys)
+        {
+            var container = await this.ConfigureContainer();
+            var qd = new QueryDefinition($"Select * from users u where u.UserName in ({String.Join(',', keys.Select(k => $"\"{k}\""))})");
+            var allknownRecords = await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
+            return allknownRecords.ToList();
+        }
+
         public async Task<UserDetailsDb> Add(UserDetailsDb newUser)
         {
             try
@@ -43,7 +51,7 @@ namespace cosmosDb.movies
             var container = await this.ConfigureContainer();
             var qd = new QueryDefinition("Select * from  u");
             return await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
-            //throw new Exception();
+            
         }
 
         public async Task<UserDetailsDb> GetByUsername(string userName)
@@ -53,19 +61,11 @@ namespace cosmosDb.movies
             var allRecordsButPleaseBeOnly1 = await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
             return allRecordsButPleaseBeOnly1.First();
         }
-
-        private static async Task<List<T>> GetRecords<T>(QueryDefinition qd, Container container, string partitionKeyValue)
+        public async Task<UserDetailsDb> Get(Guid Id)
         {
-            List<T> results = new List<T>();
-            using FeedIterator<T> feedIterator = container.GetItemQueryIterator<T>(qd, null, new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKeyValue) });
-            while (feedIterator.HasMoreResults)
-            {
-                results.AddRange(await feedIterator.ReadNextAsync());
-            }
-
-            return results;
+            var container = await this.ConfigureContainer();
+            return await container.ReadItemAsync<UserDetailsDb>(Id.ToString(), new PartitionKey("Details"));
         }
-
         public async Task<UserDetailsDb> UpdateUser(UserDetailsDb user)
         {
             try
@@ -135,5 +135,19 @@ namespace cosmosDb.movies
                 throw;
             }
         }
+
+
+        private static async Task<List<T>> GetRecords<T>(QueryDefinition qd, Container container, string partitionKeyValue)
+        {
+            List<T> results = new List<T>();
+            using FeedIterator<T> feedIterator = container.GetItemQueryIterator<T>(qd, null, new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKeyValue) });
+            while (feedIterator.HasMoreResults)
+            {
+                results.AddRange(await feedIterator.ReadNextAsync());
+            }
+
+            return results;
+        }
+
     }
 }
