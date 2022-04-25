@@ -25,8 +25,10 @@ builder.Services.AddGraphQLServer()
 
                 .AddMutationType(d=>d.Name("Mutation"))
                 .AddTypeExtension<MovieMutations>()
+                .AddTypeExtension<UserMutations>()
 
-                .AddType<MovieInfoType>();
+                .AddType<MovieInfoType>()
+                .AddType<UserGraphQlType>();
 
 
 var app = builder.Build();

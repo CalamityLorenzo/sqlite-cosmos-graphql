@@ -29,8 +29,7 @@ namespace GraphQl.WebApi.GraphQl.Users
                                             user.FavouriteGenres,
                                             user.AvoidGenres));
 
-
-
+        
 
     }
 }

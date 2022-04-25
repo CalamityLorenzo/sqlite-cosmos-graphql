@@ -11,6 +11,6 @@
          string[] AvoidGenres
         )
     {
-        public string GraphQlId { get; set; }
+        public Guid GraphQlId { get; set; } = UserId;
     }
 }

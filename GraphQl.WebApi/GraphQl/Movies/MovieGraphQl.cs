@@ -15,7 +15,8 @@
         string[]? Genres,
         string[]? Keywords)
     {
-        public Guid GraphId { get; set; }
+
+        public Guid GraphId { get; set; } = DbId;
     }
 
 }

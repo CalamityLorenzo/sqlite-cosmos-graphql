@@ -20,6 +20,33 @@ namespace cosmosDb.movies
             var containerResponse = await db.CreateContainerIfNotExistsAsync(new ContainerProperties { Id = "users", PartitionKeyPath = "/entityType" });
             return containerResponse.Container;
         }
+        public async Task<IEnumerable<UserDetailsDb>> GetAll()
+        {
+            var container = await this.ConfigureContainer();
+            var qd = new QueryDefinition("Select * from  u");
+            return await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
+
+        }
+
+        public async Task<UserDetailsDb> Get(Guid Id)
+        {
+            var container = await this.ConfigureContainer();
+            return await container.ReadItemAsync<UserDetailsDb>(Id.ToString(), new PartitionKey("Details"));
+        }
+        public async Task<UserDetailsDb> GetByUsername(string userName)
+        {
+            var container = await this.ConfigureContainer();
+            var qd = new QueryDefinition("Select * from users u where u.UserName = @username").WithParameter("@username", userName);
+            var allRecordsButPleaseBeOnly1 = await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
+            return allRecordsButPleaseBeOnly1.First();
+        }
+        public async Task<IList<UserDetailsDb>> GetByIds(IReadOnlyList<Guid> keys)
+        {
+            var container = await this.ConfigureContainer();
+            var qd = new QueryDefinition($"Select * from users u where u.id in ({String.Join(',', keys.Select(k => $"\"{k.ToString()}\""))})");
+            var allknownRecords = await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
+            return allknownRecords.ToList();
+        }
 
         public async Task<IList<UserDetailsDb>> GetByUsernames(IEnumerable<string> keys)
         {
@@ -33,6 +60,8 @@ namespace cosmosDb.movies
         {
             try
             {
+                if (newUser.UserId != Guid.Empty)
+                    throw new ArgumentException("User already exists");
                 var container = await this.ConfigureContainer();
                 var itemResponse = await container.CreateItemAsync<UserDetailsDb>(newUser, new PartitionKey(newUser.entityType));
                 if (itemResponse.StatusCode == System.Net.HttpStatusCode.Created)
@@ -46,32 +75,12 @@ namespace cosmosDb.movies
             }
         }
 
-        public async Task<IEnumerable<UserDetailsDb>> GetAll()
-        {
-            var container = await this.ConfigureContainer();
-            var qd = new QueryDefinition("Select * from  u");
-            return await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
-            
-        }
-
-        public async Task<UserDetailsDb> GetByUsername(string userName)
-        {
-            var container = await this.ConfigureContainer();
-            var qd = new QueryDefinition("Select * from users u where u.UserName = @username").WithParameter("@username", userName);
-            var allRecordsButPleaseBeOnly1 = await UserRepository.GetRecords<UserDetailsDb>(qd, container, "Details");
-            return allRecordsButPleaseBeOnly1.First();
-        }
-        public async Task<UserDetailsDb> Get(Guid Id)
-        {
-            var container = await this.ConfigureContainer();
-            return await container.ReadItemAsync<UserDetailsDb>(Id.ToString(), new PartitionKey("Details"));
-        }
-        public async Task<UserDetailsDb> UpdateUser(UserDetailsDb user)
+        public async Task<UserDetailsDb> Update(UserDetailsDb user)
         {
             try
             {
                 var container = await this.ConfigureContainer();
-                var itemResponse = await container.UpsertItemAsync<UserDetailsDb>(user, new PartitionKey(user.entityType));
+                var itemResponse = await container.ReplaceItemAsync<UserDetailsDb>(user, user.UserId.ToString(), new PartitionKey(user.entityType));
                 if (itemResponse.StatusCode == System.Net.HttpStatusCode.Created)
                     return itemResponse.Resource;
                 else
@@ -83,6 +92,7 @@ namespace cosmosDb.movies
             }
 
         }
+
 
         public async Task<UserReviewsDb> GetReviews(Guid userID)
         {
