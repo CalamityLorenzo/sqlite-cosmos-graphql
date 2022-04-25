@@ -63,7 +63,7 @@ namespace cosmosDb.movies
                 if (newUser.UserId != Guid.Empty)
                     throw new ArgumentException("User already exists");
                 var container = await this.ConfigureContainer();
-                var itemResponse = await container.CreateItemAsync<UserDetailsDb>(newUser, new PartitionKey(newUser.entityType));
+                var itemResponse = await container.CreateItemAsync<UserDetailsDb>(newUser with {  UserId = Guid.NewGuid()}, new PartitionKey(newUser.entityType));
                 if (itemResponse.StatusCode == System.Net.HttpStatusCode.Created)
                     return itemResponse.Resource;
                 else
@@ -81,7 +81,7 @@ namespace cosmosDb.movies
             {
                 var container = await this.ConfigureContainer();
                 var itemResponse = await container.ReplaceItemAsync<UserDetailsDb>(user, user.UserId.ToString(), new PartitionKey(user.entityType));
-                if (itemResponse.StatusCode == System.Net.HttpStatusCode.Created)
+                if (itemResponse.StatusCode == System.Net.HttpStatusCode.OK)
                     return itemResponse.Resource;
                 else
                     throw new Exception("User not created");

@@ -11,7 +11,7 @@ namespace GraphQl.WebApi.GraphQl.Users
         {
             try
             {
-                var dbUser = new UserDetailsDb(input.Username, input.Firstname, input.Surname, input.EmailAddress, input.Birthday);
+                var dbUser = new UserDetailsDb(Guid.Empty, input.Username, input.Firstname, input.Surname, input.EmailAddress, input.Birthday, new string[] { }, new string[] { });
 
                 var newDbUser = await app.Users.Add(dbUser);
                 return new AddUserPayload(new UserGraphQl(
@@ -37,8 +37,18 @@ namespace GraphQl.WebApi.GraphQl.Users
             {
                 var dbUser = new UserDetailsDb(input.User.UserId, input.User.Username, input.User.Firstname, input.User.Surname, input.User.EmailAddress, input.User.Birthdate, input.User.FavouriteGenres, input.User.AvoidGenres);
 
-                return new UpdateUserPayload(await app.Users.Update(dbUser));
-                
+                var updatedDbUser = await app.Users.Update(dbUser);
+
+                return new UpdateUserPayload(new UserGraphQl(
+                                            updatedDbUser.UserId,
+                                            updatedDbUser.UserName,
+                                            updatedDbUser.Firstname,
+                                            updatedDbUser.Surname,
+                                            updatedDbUser.EmailAddress,
+                                            updatedDbUser.Birthdate,
+                                            updatedDbUser.FavouriteGenres,
+                                            updatedDbUser.AvoidGenres));
+
             }
             catch (Exception ex)
             {
