@@ -1,12 +1,11 @@
 ﻿using cosmosDb.movies.Repos;
-using GraphQl.WebApi.GraphQl.Common;
-using sqlite.movies.Models;
 
 namespace GraphQl.WebApi.GraphQl.Movies
 {
     [ExtendObjectType("Query")]
     public class MovieQueries
     {
+        [UsePaging(MaxPageSize =10)]
         public async Task<IEnumerable<MovieGraphQl>> MoviesByTitleDescription(MoviesByTitleDescriptionInput input, [Service] IMovieUserDb repo, CancellationToken ct)
         {
             var result = await repo.Movies.SearchMoviesByTitleDescription(input.SearchTerms);

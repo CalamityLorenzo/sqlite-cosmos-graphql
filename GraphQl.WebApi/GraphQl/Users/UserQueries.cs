@@ -15,7 +15,7 @@ namespace GraphQl.WebApi.GraphQl.Users
             return new UserGraphQl(user.UserId, user.UserName, user.Firstname, user.Surname, user.EmailAddress, user.Birthdate, user.FavouriteGenres, user.AvoidGenres);
         }
 
-        public  Task<UserGraphQl> GetUserByUsername(UserByUsernameInput input, UsersByUsernameDataLoader dataloader, CancellationToken ct) => dataloader.LoadAsync(input.Username, ct);
+        public Task<UserGraphQl> GetUserByUsername(UserByUsernameInput input, UsersByUsernameDataLoader dataloader, CancellationToken ct) => dataloader.LoadAsync(input.Username, ct);
 
         public async Task<IEnumerable<UserGraphQl>> GetUsers(
             [Service] IMovieUserDb repo
@@ -28,8 +28,6 @@ namespace GraphQl.WebApi.GraphQl.Users
                                             user.Birthdate,
                                             user.FavouriteGenres,
                                             user.AvoidGenres));
-
-        
 
     }
 }
